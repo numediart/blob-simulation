@@ -1,0 +1,10 @@
+{
+    "Covering": {
+        "Bottom": 33.6875,
+        "Top": 6.809375000000001,
+        "Total": 20.2484375
+    },
+    "From": "save/example-detect",
+    "Loops": 10,
+    "To": "save/10_loops"
+}

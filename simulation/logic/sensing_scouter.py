@@ -14,7 +14,6 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import random
 import numpy as np
 
 from pathfinding.core.diagonal_movement import DiagonalMovement
@@ -27,11 +26,11 @@ from simulation.logic.dumb_scouter import DumbScouter
 
 class SensingScouter(DumbScouter):
 
-    def __init__(self, board, knowledge, x, y, use_diagonal=False, sight_see=-1, light_compute=True):
+    def __init__(self, board, knowledge, x, y, use_diagonal=False, sightline=-1, light_compute=True):
         DumbScouter.__init__(self, board, knowledge, x, y)
 
         self.use_diagonal = use_diagonal
-        self.sight_see = sight_see if sight_see > 0 else 1
+        self.sight_see = sightline if sightline > 0 else 1
         self.light_compute = light_compute
         self.goal = None
         self.path = []
@@ -94,7 +93,7 @@ class SensingScouter(DumbScouter):
 
     def move(self):
         # Scouter has no more goal
-        if self.goal is None: #or self.board.get_blob(self.goal[0], self.goal[1]) != 0:
+        if self.goal is None:  # or self.board.get_blob(self.goal[0], self.goal[1]) != 0:
             self.goal = self.choose_goal()
             if self.goal[0] == self.x and self.goal[1] == self.y:
                 print("Shouldn't happen")

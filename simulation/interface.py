@@ -18,6 +18,7 @@ import pygame
 import time
 import datetime
 import os.path
+import json
 
 from pygame.locals import *
 from simulation.board import Board
@@ -25,13 +26,14 @@ from simulation.board import Board
 
 class Interface:
 
-    FOOD_COLOR = (244, 210, 128) # (0, 150, 0)
-    TOUCHED_COLOR = (218, 196, 136) # (50, 50, 0)
-    BLOB_LOWER_COLOR = (206, 182, 86) # (255, 255, 0)
-    BLOB_HIGHER_COLOR = (162, 106, 59) # (255, 0, 0)
-    BACKGROUND = (120, 120, 120)
+    FOOD_COLOR = (0, 150, 0)
+    TOUCHED_COLOR = (50, 50, 0)
+    BLOB_LOWER_COLOR = (255, 255, 0)
+    BLOB_HIGHER_COLOR = (255, 0, 0)
+    BACKGROUND = (0, 0, 0)
+    BOARD_SEPARATOR = (120, 120, 120)
 
-    def __init__(self, board, player, blob, scale, save_dir):
+    def __init__(self, board, player, blob, scale, save_dir, mode, hidden=False, colors_file=None):
         """
         :type board: Board
         :type player: Player
@@ -39,8 +41,20 @@ class Interface:
         :type scale: float
         :type save_dir: str
         """
+
         pygame.init()
         # pygame.key.set_repeat(5, 50)
+
+        if colors_file is not None:
+            with open(colors_file, 'r') as file:
+                colors = json.load(file)
+
+            Interface.FOOD_COLOR = tuple(colors['FOOD_COLOR'])
+            Interface.TOUCHED_COLOR = tuple(colors['TOUCHED_COLOR'])
+            Interface.BLOB_LOWER_COLOR = tuple(colors['BLOB_LOWER_COLOR'])
+            Interface.BLOB_HIGHER_COLOR = tuple(colors['BLOB_HIGHER_COLOR'])
+            Interface.BACKGROUND = tuple(colors['BACKGROUND'])
+            Interface.BOARD_SEPARATOR = tuple(colors['BOARD_SEPARATOR'])
 
         self.board = board
         self.player = player
@@ -56,11 +70,18 @@ class Interface:
 
         width = self.board.width * scale
         height = self.board.height * scale
-        self.window = pygame.display.set_mode((width, height))
+
+        self.hidden = hidden
+        if not self.hidden:
+            self.window = pygame.display.set_mode((width, height), mode)
+
+        self.window_surface = pygame.Surface((width, height))
 
         cross_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cross.png")
 
-        discovered_food = pygame.image.load(cross_file).convert()
+        discovered_food = pygame.image.load(cross_file)
+        if not self.hidden:
+            discovered_food = discovered_food.convert()
         discovered_food.set_colorkey((255, 255, 255))
         self.discovered_food = pygame.transform.scale(discovered_food, (scale, scale))
 
@@ -101,30 +122,38 @@ class Interface:
 
         game_window = pygame.transform.scale(game_surface, (width, height))
 
-        pygame.draw.line(game_window, (125, 125, 125), (0, height / 2), (width, height / 2))
+        pygame.draw.line(game_window, Interface.BOARD_SEPARATOR, (0, height / 2), (width, height / 2))
 
-        self.window.blit(game_window, (0, 0))
+        self.window_surface.blit(game_window, (0, 0))
         for food in self.blob.knowledge['food']:
-            self.window.blit(self.discovered_food, (food[0] * self.scale, food[1] * self.scale))
-        pygame.display.flip()
+            self.window_surface.blit(self.discovered_food, (food[0] * self.scale, food[1] * self.scale))
 
-    def save(self):
-        ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
+        if not self.hidden:
+            self.window.blit(self.window_surface, (0, 0))
+            pygame.display.flip()
 
-        print("Data saved at " + ts)
-        f = open(self.save_dir + ts + ".board", 'w')
+    def save(self, name=None):
+        if name is None:
+            name = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
+
+        print("Data saved at " + name)
+        f = open(self.save_dir + name + ".board", 'w')
         f.write(self.board.save())
         f.close()
 
-        f = open(self.save_dir + ts + ".blob.json", 'w')
+        f = open(self.save_dir + name + ".blob.json", 'w')
         f.write(self.blob.save())
         f.close()
 
-        f = open(self.save_dir + ts + ".player.json", 'w')
+        f = open(self.save_dir + name + ".player.json", 'w')
         f.write(self.player.save())
         f.close()
 
-        pygame.image.save(self.window, self.save_dir + ts + ".jpg")
+        if self.hidden:
+            self.draw()
+        pygame.image.save(self.window_surface, self.save_dir + name + ".jpg")
+
+        return name
 
     def event_listener(self, event):
 
@@ -134,12 +163,12 @@ class Interface:
             print("Debug Mode: " + str(self.debug_mode))
 
         elif event.type == KEYDOWN and event.key == K_UP:
-            Board.DECREASE_BLOB += 0.1
-            print("Pheromone evaporation : " + str(Board.DECREASE_BLOB))
+            self.blob.knowledge["Global Decrease"] += 0.1
+            print("Pheromone evaporation : " + str(self.blob.knowledge["Global Decrease"]))
 
         elif event.type == KEYDOWN and event.key == K_DOWN:
-            Board.DECREASE_BLOB -= 0.1
-            print("Pheromone evaporation : " + str(Board.DECREASE_BLOB))
+            self.blob.knowledge["Global Decrease"] -= 0.1
+            print("Pheromone evaporation : " + str(self.blob.knowledge["Global Decrease"]))
 
         elif event.type == KEYDOWN and event.key == K_SPACE:
             self.show_ants = not self.show_ants
@@ -149,9 +178,9 @@ class Interface:
 
         # DEBUG ACTIONS
         elif self.debug_mode and event.type == MOUSEBUTTONDOWN and event.button == 1:  # Right Click
-                x = int(pygame.mouse.get_pos()[0] / self.scale)
-                y = int(pygame.mouse.get_pos()[1] / self.scale)
-                self.board.update_blob(x, y, 10)
+            x = int(pygame.mouse.get_pos()[0] / self.scale)
+            y = int(pygame.mouse.get_pos()[1] / self.scale)
+            self.board.update_blob(x, y, 10)
 
         # PLAYER ACTIONS
         elif event.type == MOUSEBUTTONDOWN and event.button == 1:  # Right Click
@@ -183,13 +212,21 @@ class Interface:
             self.do_step = True
 
         elif event.type == KEYDOWN and event.key == 107:  # K Letter
-            if self.blob.knowledge['min_scouters'] > 0:
-                self.blob.knowledge['min_scouters'] -= 1
-                print("New minimal scouters : " + str(self.blob.knowledge['min_scouters']) + " - Currently : " + str(len(self.blob.scouters)))
+            if self.blob.knowledge["Scouters"]["Min"] > 0:
+                self.blob.knowledge["Scouters"]["Min"] -= 1
+                print("New minimal scouters : " + str(self.blob.knowledge["Scouters"]["Min"]) + " - Currently : "
+                      + str(len(self.blob.scouters)))
 
         elif event.type == KEYDOWN and event.key == 113:  # A letter
-            self.blob.knowledge['min_scouters'] += 1
-            print("New minimal scouters : " + str(self.blob.knowledge['min_scouters']) + " - Currently : " + str(len(self.blob.scouters)))
+            self.blob.knowledge["Scouters"]["Min"] += 1
+            print("New minimal scouters : " + str(self.blob.knowledge["Scouters"]["Min"]) + " - Currently : "
+                  + str(len(self.blob.scouters)))
 
         elif event.type == KEYDOWN:
             print("Unrecognised key code : " + str(event.key))
+            return False
+
+        else:
+            return False
+
+        return True

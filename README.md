@@ -1,6 +1,32 @@
 # Blob Simulation & Detection
 Détection d'un blob dans une image ainsi que détection des comprimés de nourriture. Simulation d'un blob dans PyGame à travers un système multi-agents à connaissance partagée.
 
+## Release 2.1 - *7/06/2019*
+
+### Modifications : 
++ Déplacement des scripts dans le dossier root
++ Changement du nom des fichiers enregistrés par la détection
++ Automatisation des différents scripts, ajout d'un fonctionnement en mode "caché".
++ Automatisation de la simulation avec ajouts de paramètres et sauvegarde finale
++ Ajout d'un paramètre pour initialiser de la nourriture dans la simulation
++ Ajout d'un paramètre d'affichage dans la simulation
++ Uniformisation des paramètres dans les différents scripts
++ Possibilité de raffiner un modèle détecté avec un fichier d'informations supplémentaires
++ Variables de couleur déplacées dans un fichier json séparé
++ Ajout de fichiers d'exemples pour les différents scripts
+
+### Scripts : 
++ Setup : `python setup.py -i data/example.jpg`
++ Detection : `python detect.py -i data/example.jpg`
++ Simulation : `python play.py -i data/output-examples/example-detect.board -s 3`
++ Compare : `python compare.py --first data/output-examples/simulation/10_loops/10_loops.board --second data/output-examples/simulation/100_loops/100_loops.board -s 3`
+
+Les différentes sorties produites sont les suivantes : 
+![Sortie du script de détection](data/output-examples/example-detect-details.jpg?raw=true "Sortie du script de détection") 
+![Sortie de la simulation après 100 itérations](data/output-examples/simulation/100_loops/100_loops.jpg?raw=true "Sortie de la simulation après 100 itérations")
+![Sortie du script de comparaison](data/compare_init_with_100.jpg?raw=true "Sortie du script de comparaison") 
+
+
 ## Release 2.0 - *27/05/2019*
 
 Le passage à cette release invalide les fichiers de sauvegarde précédents, le format ayant été modifié.
@@ -16,7 +42,6 @@ Le passage à cette release invalide les fichiers de sauvegarde précédents, le
 La nouvelle interface de la simulation produira des images comme celle-ci : 
 
 ![Interface de simulation](example/test-run.jpg?raw=true "Interface de simulation") 
-
 
 Pour exécuter le script de comparaison sur un exemple : 
 `python compare.py --first example/test.board --second example/test-run.board`

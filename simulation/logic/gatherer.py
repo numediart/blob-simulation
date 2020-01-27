@@ -26,30 +26,30 @@ from simulation.logic.dumb_scouter import DumbScouter
 
 
 class Gatherer(DumbScouter):
-    def __init__(self, board, knowledge, x, y, use_diagonal=True, sight_see=-1, light_compute=True):
+    def __init__(self, board, knowledge, x, y, use_diagonal=True, sightline=-1, light_compute=True):
         DumbScouter.__init__(self, board, knowledge, x, y)
 
         self.use_diagonal = use_diagonal
         self.light_compute = light_compute
-        self.sight_see = sight_see if sight_see > 0 else max(self.board.width, self.board.height)
+        self.sight_see = sightline if sightline > 0 else max(self.board.width, self.board.height)
 
         self.goal = None
         self.path = []
 
     def get_matrix(self, x0, y0, x1, y1):
-            width = x1 - x0
-            height = y1 - y0
-            matrix = np.zeros((width, height))
-            for y in range(height):
-                for x in range(width):
-                    if self.board.get_blob(x0 + x, y0 + y) > 0:
-                        matrix[x, y] = 1 + (Board.MAX_BLOB - self.board.get_blob(x0 + x, y0 + y))
+        width = x1 - x0
+        height = y1 - y0
+        matrix = np.zeros((width, height))
+        for y in range(height):
+            for x in range(width):
+                if self.board.get_blob(x0 + x, y0 + y) > 0:
+                    matrix[x, y] = 1 + (Board.MAX_BLOB - self.board.get_blob(x0 + x, y0 + y))
+                else:
+                    if self.board.is_touched(x0 + x, y0 + y):
+                        matrix[x, y] = Board.MAX_BLOB * 2
                     else:
-                        if self.board.is_touched(x0 + x, y0 + y):
-                            matrix[x, y] = Board.MAX_BLOB * 2
-                        else:
-                            matrix[x, y] = 0
-            return np.transpose(matrix)
+                        matrix[x, y] = 0
+        return np.transpose(matrix)
 
     def compute_sight_see_goal(self, x0, y0, x1, y1):
         if x0 <= self.goal[0] < x1 and y0 <= self.goal[1] < y1:

@@ -23,23 +23,23 @@ from simulation.logic.sensing_scouter import SensingScouter
 class AdvancedScouter(SensingScouter):
     """
            Knowledge used:
-                - explore_ratio : (float, between 0 and 1) Set the ratio between exploring globally and exploring
-                locally
-                - search_local_on_food : when stepping on food, automatically search locally
+                - ["Scouting"]["Global Explore Probability"] : (float, between 0 and 1) Set the ratio between exploring
+                    globally and exploring locally
+                - ["Scouting"]["Search Locally on Food"] : when stepping on food, automatically search locally
     """
 
-    def __init__(self, board, knowledge, x, y, use_diagonal=False, sight_see=3, light_compute=True):
-        SensingScouter.__init__(self, board, knowledge, x, y, use_diagonal, sight_see, light_compute)
+    def __init__(self, board, knowledge, x, y, use_diagonal=False, sightline=3, light_compute=True):
+        SensingScouter.__init__(self, board, knowledge, x, y, use_diagonal, sightline, light_compute)
         self.state = 0
 
     def choose_goal(self):
         if self.state == 0:
-            if not (self.board.has_food(self.x, self.y) and self.knowledge['search_local_on_food']) \
-                    and self.knowledge['explore_ratio'] < random.random():
+            if not (self.board.has_food(self.x, self.y) and self.knowledge["Scouting"]["Search Locally on Food"]) \
+                    and self.knowledge["Scouting"]["Global Explore Probability"] < random.random():
                 self.state = 1
             return self.choose_local_goal()
         else:
-            if self.knowledge['explore_ratio'] >= random.random():
+            if self.knowledge["Scouting"]["Global Explore Probability"] >= random.random():
                 self.state = 0
             return self.choose_global_goal()
 
@@ -69,8 +69,9 @@ class AdvancedScouter(SensingScouter):
             return min_indices[0][i] + x0, min_indices[1][i] + y0
 
     def move(self):
-        if self.board.has_food(self.x, self.y) and self.knowledge['search_local_on_food'] and self.state == 1:
+        if self.board.has_food(self.x, self.y) and self.knowledge["Scouting"]["Search Locally on Food"] \
+                and self.state == 1:
             self.goal = None
-            self.state = 0 # Food found, search locally
+            self.state = 0  # Food found, search locally
 
         SensingScouter.move(self)

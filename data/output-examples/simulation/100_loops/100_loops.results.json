@@ -1,0 +1,10 @@
+{
+    "Covering": {
+        "Bottom": 34.74375,
+        "Top": 9.35,
+        "Total": 22.046875
+    },
+    "From": "save/example-detect",
+    "Loops": 100,
+    "To": "save/2019-06-07_16.26.50"
+}

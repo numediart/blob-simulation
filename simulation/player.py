@@ -57,12 +57,16 @@ class Player:
             y_range = ceil(self.board.height / 2)
 
         foods = 0
+        foods_list = []
         while foods < qt:
             x = randrange(self.board.width)
             y = y_offset + randrange(y_range)
             if not self.board.has_food(x, y):
                 if self.set_food(x, y):
                     foods += 1
+                    foods_list.append((x, y))
+
+        return foods_list
 
     def remove_food(self, x, y):
         food_remove = False
@@ -77,22 +81,25 @@ class Player:
                         food_remove = True
 
         if not food_remove:
-            print("Blob already found it !")
+            # print("Blob already found it !")
+            return False
 
-    def set_food(self, x, y):
+        return True
+
+    def set_food(self, x, y, force=False, value=Board.INIT_FOOD):
         food_put = False
         x0, y0 = int(x - self.food_size / 2), int(y - self.food_size / 2)
         for x_size in range(self.food_size):
             for y_size in range(self.food_size):
                 if not self.use_circle or (x_size - self.food_size / 2) ** 2 + (y_size - self.food_size / 2) ** 2 <= \
                         (self.food_size / 2 - 0.5) ** 2:
-                    if self.board.inside(x0 + x_size, y0 + y_size) and not self.board.is_touched(x0 + x_size,
-                                                                                                 y0 + y_size):
-                        self.board.set_food(x0 + x_size, y0 + y_size)
-                        food_put = True
+                    if self.board.inside(x0 + x_size, y0 + y_size):
+                        if force or not self.board.is_touched(x0 + x_size, y0 + y_size):
+                            self.board.set_food(x0 + x_size, y0 + y_size, value)
+                            food_put = True
 
         if not food_put:
-            print("There is blob there !")
+            # print("There is blob there !")
             return False
 
         return True

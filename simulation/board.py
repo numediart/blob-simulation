@@ -21,8 +21,6 @@ class Board:
 
     MAX_BLOB = 255.0
     MIN_BLOB = 0.0
-    MIN_FOOD_BLOB = 50
-    DECREASE_BLOB = 0.1
     INIT_FOOD = 100
 
     def __init__(self, width, height):
@@ -37,8 +35,7 @@ class Board:
         stream = str(self.width) + ' ' + str(self.height) + '\n'
         for y in range(self.height):
             for x in range(self.width):
-                # TODO change food savings
-                saved_node = "{:d},{:d},{} ".format(self.touched[x, y], self.foods[x, y] != 0, self.dropped_blob[x, y])
+                saved_node = "{:d},{},{} ".format(self.touched[x, y], self.foods[x, y], self.dropped_blob[x, y])
                 stream += saved_node
             stream = stream.rstrip(' ')
             stream += '\n'
@@ -66,11 +63,7 @@ class Board:
                         print("Error with packaged values !")
 
                     self.touched[x, y] = values[0] == '1'
-
-                    # TODO Adapt loadings
-                    if values[1] == '1':
-                        self.foods[x, y] = Board.INIT_FOOD
-
+                    self.foods[x, y] = float(values[1])
                     self.dropped_blob[x, y] = float(values[2])
                     x += 1
 
@@ -79,9 +72,9 @@ class Board:
     def has_food(self, x, y):
         return self.inside(x, y) and self.foods[x, y] > 0
 
-    def set_food(self, x, y):
+    def set_food(self, x, y, value=INIT_FOOD):
         if not self.foods[x, y] > 0:
-            self.foods[x, y] = Board.INIT_FOOD
+            self.foods[x, y] = value
 
     def remove_food(self, x, y):
         if self.foods[x, y] > 0:
@@ -90,7 +83,7 @@ class Board:
     def update_blob(self, x, y, change_value):
         if self.inside(x, y):
             self.touched[x, y] = True
-            self.dropped_blob[x, y] = max(0, min(self.dropped_blob[x, y] + change_value, Board.MAX_BLOB))
+            self.dropped_blob[x, y] = max(Board.MIN_BLOB, min(self.dropped_blob[x, y] + change_value, Board.MAX_BLOB))
             return True
         else:
             return False
@@ -140,12 +133,12 @@ class Board:
 
         return total / self.height / self.width / self.MAX_BLOB * 100
 
-    def next_turn(self, food_lock=True):
+    def manage_blob(self, value, min_food_value=MIN_BLOB):
         for x in range(self.width):
             for y in range(self.height):
                 if self.touched[x, y]:
-                    if not (food_lock and self.foods[x, y] > 0 and self.dropped_blob[x, y] <= Board.MIN_FOOD_BLOB):
-                        self.update_blob(x, y, -Board.DECREASE_BLOB)
+                    if not (self.foods[x, y] > 0 and self.dropped_blob[x, y] <= min_food_value):
+                        self.update_blob(x, y, -value)
 
     def reset(self, x, y):
         if self.inside(x, y):

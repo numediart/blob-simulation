@@ -25,11 +25,11 @@ class FSMAnt(DumbScouter):
 
     """
         Knowledge used:
-            - min_harvest: (float) Min value an ant has to store to stop being starved
-            - max_harvest: (float) Max value an ant can carry
-            - eat: (float) Value an ant eat to do a step
-            - harvest: (float) Value an ant collect by stepping on food
-            - use_diagonal: (bool) Allow ants to use diagonals to travel
+            - ["Harvesting"]["Min"]: (float) Min value an ant has to store to stop being starved
+            - ["Harvesting"]["Max"]: (float) Max value an ant can carry
+            - ["Harvesting"]["Eat"]: (float) Value an ant eat to do a step
+            - ["Harvesting"]["Collect"]: (float) Value an ant collect by stepping on food
+            - ["Gathering"]/["Scouting"]["Diagonal Moves"]: (bool) Allow ants to use diagonals to travel
     """
 
     # Multiplication factor for drop value (see blob variable) when an ant is starving
@@ -43,12 +43,15 @@ class FSMAnt(DumbScouter):
         :type y: int
         """
         DumbScouter.__init__(self, board, knowledge, x, y)
-        self.gatherer_logic = Gatherer(board, knowledge, x, y, self.knowledge["use_diagonal"])
-        self.scouting_logic = AdvancedScouter(board, knowledge, x, y, self.knowledge["use_diagonal"])
+        self.gatherer_logic = Gatherer(board, knowledge, x, y, self.knowledge["Gathering"]["Diagonal Moves"],
+                                       self.knowledge["Gathering"]["Sightline"],
+                                       self.knowledge["Gathering"]["Light Compute"])
+        self.scouting_logic = AdvancedScouter(board, knowledge, x, y, self.knowledge["Scouting"]["Diagonal Moves"],
+                                              self.knowledge["Scouting"]["Sightline"],
+                                              self.knowledge["Scouting"]["Light Compute"])
 
-        self.stored = self.knowledge["min_harvest"]
+        self.stored = self.knowledge["Harvesting"]["Min"]
         self.starving = False
-        self.init_drop = self.knowledge['drop']
 
     def move(self):
         if self.starving:
@@ -69,24 +72,22 @@ class FSMAnt(DumbScouter):
         self.scouting_logic.reset()
         self.scouting_logic.x = self.x
         self.scouting_logic.y = self.y
-        self.drop = self.init_drop
 
     def update(self):
-        # if self.harvest > 0 and self.starving:
-        #     self.drop = FSMAnt.RATIO_DROP_STARVE * self.init_drop
-
-        self.drop = self.init_drop * self.stored
+        eat_ratio = self.knowledge["Harvesting"]["Eat"] * (Board.MAX_BLOB - self.board.get_blob(self.x, self.y)) \
+                    / Board.MAX_BLOB
+        self.drop = self.knowledge["Scouters"]["Drop by eat"] * eat_ratio
         DumbScouter.update(self)
 
         if not self.starving:
-            self.stored -= self.knowledge["eat"]
+            self.stored -= eat_ratio
             self.stored = max(0, self.stored)
 
         if self.board.has_food(self.x, self.y):
             if len(self.knowledge['food']) == 1:
-                wanted = min(self.knowledge["min_harvest"], self.knowledge["max_harvest"] - self.stored)
+                wanted = min(self.knowledge["Harvesting"]["Min"], self.knowledge["Harvesting"]["Max"] - self.stored)
             else:
-                wanted = min(self.knowledge["harvest"], self.knowledge["max_harvest"] - self.stored)
+                wanted = min(self.knowledge["Harvesting"]["Collect"], self.knowledge["Harvesting"]["Max"] - self.stored)
 
             received, finished = self.board.eat_food(self.x, self.y, wanted)
             self.stored += received
@@ -98,6 +99,6 @@ class FSMAnt(DumbScouter):
             self.starving = True
             self.init_gathering()
 
-        if self.stored >= self.knowledge["min_harvest"] and self.starving:
+        if self.stored >= self.knowledge["Harvesting"]["Min"] and self.starving:
             self.starving = False
             self.init_scouting()

@@ -1,0 +1,32 @@
+{
+    "Computing": {
+        "Blob Size Factor": 0.25,
+        "Covering Factor": 0.75,
+        "Global Factor": 2.78,
+        "Known Foods Factor": 0.05
+    },
+    "Gathering": {
+        "Diagonal Moves": true,
+        "Light Compute": true,
+        "Sightline": -1
+    },
+    "Global Decrease": 0.1,
+    "Harvesting": {
+        "Collect": 10,
+        "Eat": 5,
+        "Max": 30,
+        "Min": 30
+    },
+    "Remaining Blob on Food": 50,
+    "Scouters": {
+        "Drop by eat": 25,
+        "Min": 2
+    },
+    "Scouting": {
+        "Diagonal Moves": true,
+        "Global Explore Probability": 0.02,
+        "Light Compute": true,
+        "Search Locally on Food": true,
+        "Sightline": 3
+    }
+}

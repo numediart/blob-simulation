@@ -21,11 +21,11 @@ import imutils
 
 def saturation(img):
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    return hsv[:,:,1]
+    return hsv[:, :, 1]
 
 
 def mean_image(images):
-    mean = 0
+    mean = np.zeros(images[0].shape)
 
     for image in images:
         mean += image/len(images)
@@ -87,9 +87,9 @@ def find_blob(sat_img, max_blob=1, area_ratio=0.8, kernel=None):
 
     blobs = []
 
-    while len(contours) != 0 and len(blobs) < max_blob :
+    while len(contours) != 0 and len(blobs) < max_blob:
         c = max(contours, key=cv2.contourArea)
-        if len(blobs) != 0 and cv2.contourArea(blobs[0]) * area_ratio >= cv2.contourArea(c) :
+        if len(blobs) != 0 and cv2.contourArea(blobs[0]) * area_ratio >= cv2.contourArea(c):
             break
         blobs.append(c)
         contours.remove(c)
@@ -100,4 +100,3 @@ def find_blob(sat_img, max_blob=1, area_ratio=0.8, kernel=None):
     kept_cleaned = cv2.bitwise_and(cleaned, cleaned, mask=mask)
 
     return kept_cleaned
-

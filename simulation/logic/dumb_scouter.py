@@ -18,6 +18,7 @@ import random
 
 from simulation.board import Board
 
+
 class DumbScouter:
     """ Dumb scouter searching food randomly and without any knowledge """
 
@@ -32,7 +33,7 @@ class DumbScouter:
         self.knowledge = knowledge
         self.x = x
         self.y = y
-        self.drop = self.knowledge['drop']
+        self.drop = self.knowledge["Scouters"]["Drop by eat"]
 
     def move(self):
         x = self.x + random.randint(-1, 1)
