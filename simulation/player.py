@@ -22,16 +22,18 @@ from simulation.board import Board
 
 
 class Player:
+    """ A player class giving methods to help user interacts with Board """
 
-    def __init__(self, board, blob, default_config):
+    def __init__(self, board, blob, config):
         """
-        :type blob: Blob_Manager
-        :type board: Board
+        :param board: a Board instance
+        :param blob: a BlobManager instance
+        :param config: a config file to set up player variables
         """
         self.board = board
         self.blob = blob
 
-        with open(default_config, 'r') as file:
+        with open(config, 'r') as file:
             d = json.load(file)
 
         self.clean_top = d['clean_top']
@@ -39,6 +41,9 @@ class Player:
         self.use_circle = d['use_food_circle']
 
     def save(self):
+        """
+        :return: a json string with player variables to save
+        """
         d = dict()
         d['clean_top'] = self.clean_top
         d['food_size'] = self.food_size
@@ -46,6 +51,13 @@ class Player:
         return json.dumps(d, indent=4, sort_keys=True)
 
     def set_random_food(self, qt, random_top=None):
+        """
+        Put a certain quantity of foods on the board with size self.food_size
+        :param qt: number of foods to put
+        :param random_top: set to True if you want to put only on top board
+            or false if you want to put them only on bottom board
+        :return: the list of random food positions used
+        """
         if random_top is None:  # Randomize over all the board
             y_offset = 0
             y_range = self.board.height
@@ -69,6 +81,12 @@ class Player:
         return foods_list
 
     def remove_food(self, x, y):
+        """
+        Remove all non-touched food in the area self.food_size of (x,y) square
+        :param x: horizontal square position
+        :param y: vertical square position
+        :return: True if any food has been removed, False otherwise
+        """
         food_remove = False
         x0, y0 = int(x - self.food_size / 2), int(y - self.food_size / 2)
         for x_size in range(self.food_size):
@@ -87,6 +105,14 @@ class Player:
         return True
 
     def set_food(self, x, y, force=False, value=Board.INIT_FOOD):
+        """
+        Put a food of size self.food_size with center (x,y) square
+        :param x: horizontal square position
+        :param y: vertical square position
+        :param force: if true, put food even if blob already touched square
+        :param value: the initial value of food set
+        :return: True if any food has been put, False otherwise
+        """
         food_put = False
         x0, y0 = int(x - self.food_size / 2), int(y - self.food_size / 2)
         for x_size in range(self.food_size):
@@ -105,9 +131,16 @@ class Player:
         return True
 
     def check_blob_cover(self):
+        """
+        :return: a tuple with blob half-board (top, bottom) covering
+        """
         return self.board.get_cover(1), self.board.get_cover(2)
 
     def clean_board(self):
+        """
+        Reset one of the half-board, depending of self.clean_top variable
+        (if true, reset top board, otherwise bottom board)
+        """
         y_range = ceil(self.board.height/2)
 
         if self.clean_top:

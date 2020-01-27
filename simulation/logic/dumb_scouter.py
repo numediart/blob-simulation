@@ -20,14 +20,14 @@ from simulation.board import Board
 
 
 class DumbScouter:
-    """ Dumb scouter searching food randomly and without any knowledge """
+    """ Dumb scouter searching food randomly and without any knowledge except a drop ratio"""
 
     def __init__(self, board, knowledge, x, y):
         """
-        :type board: Board
-        :type knowledge: dict
-        :type x: int
-        :type y: int
+        :param board: A board class instance
+        :param knowledge: a dict containing all blob knowledge and set up
+        :param x: current horizontal position of the ant
+        :param y: current vertical position of the ant
         """
         self.board = board
         self.knowledge = knowledge
@@ -36,6 +36,9 @@ class DumbScouter:
         self.drop = self.knowledge["Scouters"]["Drop by eat"]
 
     def move(self):
+        """
+        Move the scouter by one square
+        """
         x = self.x + random.randint(-1, 1)
         y = self.y + random.randint(-1, 1)
         if self.board.inside(x, y):
@@ -43,4 +46,7 @@ class DumbScouter:
             self.y = y
 
     def update(self):
+        """
+        Update board with drop ratio on the current position
+        """
         self.board.update_blob(self.x, self.y, self.drop)

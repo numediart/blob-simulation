@@ -20,8 +20,8 @@ from detection.detection_setup import setup
 
 def main():
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--input", required=True, help="Uses this input as image for setup")
+    ap = argparse.ArgumentParser("Setup the config file for blob detection and simulation")
+    ap.add_argument("input", metavar="INPUT", help="Uses this input as image for setup")
     ap.add_argument("-s", "--scale", type=float, default=0.25, help="Scales image by this factor (default: x0.25)")
     ap.add_argument("-c", "--config", type=str, default="detection/config.json",
                     help="Saves config under this filename (default: detection/config.json)")

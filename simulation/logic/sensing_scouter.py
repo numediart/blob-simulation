@@ -25,20 +25,39 @@ from simulation.logic.dumb_scouter import DumbScouter
 
 
 class SensingScouter(DumbScouter):
+    """ An ant with goal is to explore unknown (or non-touched) square """
 
     def __init__(self, board, knowledge, x, y, use_diagonal=False, sightline=-1, light_compute=True):
+        """
+        :param board: A board class instance
+        :param knowledge: a dict containing all blob knowledge and set up
+        :param x: current horizontal position of the ant
+        :param y: current vertical position of the ant
+        :param use_diagonal: boolean set to true if diagonal moves are available
+        :param sightline: size of the ant sightline, used to compute goal decision
+        :param light_compute: boolean set to true if path is computing only once and then memorized until reaching goal
+        """
         DumbScouter.__init__(self, board, knowledge, x, y)
 
         self.use_diagonal = use_diagonal
-        self.sight_see = sightline if sightline > 0 else 1
+        self.sightline = sightline if sightline > 0 else 1
         self.light_compute = light_compute
         self.goal = None
         self.path = []
 
     def get_matrix(self, x0, y0, x1, y1):
+        """
+        Compute and return a pathfinding matrix filled with board squares values
+        in the rectangle given by (x0,y0) and (x1,y1)
+        :param x0: the x coordinate of the up left corner of the rectangle
+        :param y0: the y coordinate of the up left corner of the rectangle
+        :param x1: the x coordinate of the bottom right corner of the rectangle
+        :param y1: the x coordinate of the bottom right corner of the rectangle
+        """
         width = x1 - x0
         height = y1 - y0
         matrix = np.zeros((width, height))
+
         for y in range(height):
             for x in range(width):
                 if self.board.get_blob(x0 + x, y0 + y) > 0:
@@ -47,11 +66,15 @@ class SensingScouter(DumbScouter):
                     matrix[x, y] = Board.MAX_BLOB * 2
                 else:
                     matrix[x, y] = 1
+
         return np.transpose(matrix)
 
     def choose_goal(self):
-        x0, y0 = max(0, self.x - self.sight_see), max(0, self.y - self.sight_see)
-        x1, y1 = min(self.board.width, self.x + self.sight_see + 1), min(self.board.height, self.y + self.sight_see + 1)
+        """
+        :return: a new goal for ant, based on unreached known food
+        """
+        x0, y0 = max(0, self.x - self.sightline), max(0, self.y - self.sightline)
+        x1, y1 = min(self.board.width, self.x + self.sightline + 1), min(self.board.height, self.y + self.sightline + 1)
 
         mask = np.zeros((x1 - x0, y1 - y0), dtype=bool)
         mask[self.x - x0, self.y - y0] = True
@@ -65,10 +88,13 @@ class SensingScouter(DumbScouter):
             return min_indices[0][i] + x0, min_indices[1][i] + y0
 
     def best_way_to(self):
-        if self.sight_see > 0:
-            x0, y0 = max(0, self.x - self.sight_see), max(0, self.y - self.sight_see)
-            x1, y1 = min(self.board.width, self.x + self.sight_see + 1), min(self.board.height,
-                                                                             self.y + self.sight_see + 1)
+        """
+        Inside sightline, compute pathfinding matrix, set local goal, compute and store path
+        """
+        if self.sightline > 0:
+            x0, y0 = max(0, self.x - self.sightline), max(0, self.y - self.sightline)
+            x1, y1 = min(self.board.width, self.x + self.sightline + 1), min(self.board.height,
+                                                                             self.y + self.sightline + 1)
         else:
             x0, y0 = 0, 0
             x1, y1 = self.board.width, self.board.height
@@ -89,9 +115,17 @@ class SensingScouter(DumbScouter):
             self.path[i] = (step[0] + x0, step[1] + y0)
 
     def reached(self, goal):
+        """
+        :param goal: a x,y tuple coordinate of the goal
+        :return: True if goal exists and has been reached
+        """
         return goal is not None and self.x == goal[0] and self.y == goal[1]
 
     def move(self):
+        """
+        Move ant towards set goal or compute a new goal if needed
+        """
+
         # Scouter has no more goal
         if self.goal is None:  # or self.board.get_blob(self.goal[0], self.goal[1]) != 0:
             self.goal = self.choose_goal()
@@ -99,11 +133,13 @@ class SensingScouter(DumbScouter):
                 print("Shouldn't happen")
             self.path = []
 
-            # No goal
+            # No new goal found
             if self.goal is None:
                 return
 
         # Scouter has no more path to goal
+        # TODO Light compute could be integrated by only checking if next move is an autorized move
+        #  and otherwise recalculate
         if len(self.path) == 0 or not self.light_compute:
             self.best_way_to()
 
@@ -112,6 +148,7 @@ class SensingScouter(DumbScouter):
                 self.goal = None
                 return
 
+        # Move the ant by one square
         new_pos = self.path[0]
         self.path = self.path[1:]
 
@@ -124,6 +161,9 @@ class SensingScouter(DumbScouter):
             self.path = []
 
     def reset(self):
+        """
+        Reset the ant including goal, path and position
+        """
         self.goal = None
         self.path = []
         self.x = 0

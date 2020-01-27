@@ -39,10 +39,10 @@ DEFAULT_DIR = "simulation/default"
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--height', type=int, default=40,
-                        help='New game board height resolution (default: 40)')
+                        help='New game board height resolution if no input is given(default: 40)')
     parser.add_argument('--width', type=int, default=100,
-                        help='New game board width resolution (default: 100)')
-    parser.add_argument('-i', '--input', type=str,
+                        help='New game board width resolution if no input is given(default: 100)')
+    parser.add_argument('input', metavar="INPUT", type=str, nargs='?', default=None,
                         help='Initialize game from a save. Overwrite height and width parameters. '
                              'Pass the board filename as input (.board extension)')
     parser.add_argument('-s', '--scale', type=int, default=10,

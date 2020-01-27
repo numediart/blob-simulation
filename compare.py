@@ -21,19 +21,19 @@ from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--first", required=True, help="first board file")
-    ap.add_argument("--second", required=True, help="second board file")
+    ap = argparse.ArgumentParser(description="Compare two board files and express it as an image.")
+    ap.add_argument("input_1", metavar= "FIRST_INPUT", help="first board file")
+    ap.add_argument("input_2", metavar= "SECOND_INPUT", help="second board file to compare with")
     ap.add_argument("-s", "--scale", type=float, default=10,
                     help="Scales board resolution by this factor (default: x10)")
     ap.add_argument("-o", "--output", type=str, help="Give a name to save the jpeg file")
     args = ap.parse_args()
 
     board_1 = board.Board(0, 0)
-    board_1.load(args.first)
+    board_1.load(args.input_1)
 
     board_2 = board.Board(0, 0)
-    board_2.load(args.second)
+    board_2.load(args.input_2)
 
     board_comp = board_1.compare(board_2)
 

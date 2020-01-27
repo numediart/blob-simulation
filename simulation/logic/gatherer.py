@@ -26,17 +26,40 @@ from simulation.logic.dumb_scouter import DumbScouter
 
 
 class Gatherer(DumbScouter):
+    """ An ant with the only goal is to move to different food squares"""
+
+    # TODO Gatherer could have a more intuitive logic without knowing the exact location of foods outside sightline
+    #  and by following only maximum blob quantity to hope find food.
+    #  But this will likely lead to disconnection of blob from food to food...
+
     def __init__(self, board, knowledge, x, y, use_diagonal=True, sightline=-1, light_compute=True):
+        """
+        :param board: A board class instance
+        :param knowledge: a dict containing all blob knowledge and set up
+        :param x: current horizontal position of the ant
+        :param y: current vertical position of the ant
+        :param use_diagonal: boolean set to true if diagonal moves are available
+        :param sightline: size of the ant sightline, used to compute goal decision
+        :param light_compute: boolean set to true if path is computing only once and then memorized until reaching goal
+        """
         DumbScouter.__init__(self, board, knowledge, x, y)
 
         self.use_diagonal = use_diagonal
         self.light_compute = light_compute
-        self.sight_see = sightline if sightline > 0 else max(self.board.width, self.board.height)
+        self.sightline = sightline if sightline > 0 else max(self.board.width, self.board.height)
 
         self.goal = None
         self.path = []
 
     def get_matrix(self, x0, y0, x1, y1):
+        """
+        Compute and return a pathfinding matrix filled with board squares values
+        in the rectangle given by (x0,y0) and (x1,y1)
+        :param x0: the x coordinate of the up left corner of the rectangle
+        :param y0: the y coordinate of the up left corner of the rectangle
+        :param x1: the x coordinate of the bottom right corner of the rectangle
+        :param y1: the x coordinate of the bottom right corner of the rectangle
+        """
         width = x1 - x0
         height = y1 - y0
         matrix = np.zeros((width, height))
@@ -52,10 +75,19 @@ class Gatherer(DumbScouter):
         return np.transpose(matrix)
 
     def compute_sight_see_goal(self, x0, y0, x1, y1):
+        """
+        Compute and return a local goal in (x0,y0) (x1,y1) area to reach global food goal
+        :param x0: the x coordinate of the up left corner of the rectangle
+        :param y0: the y coordinate of the up left corner of the rectangle
+        :param x1: the x coordinate of the bottom right corner of the rectangle
+        :param y1: the x coordinate of the bottom right corner of the rectangle
+        """
+
+        # Check if goal is not in sightline rectangle
         if x0 <= self.goal[0] < x1 and y0 <= self.goal[1] < y1:
-            # Goal in sight_see
             return self.goal[0] - x0, self.goal[1] - y0
 
+        # Compute linear projection from the goal inside rectangle and find minimal t parameter of this projection
         delta_x = self.x - self.goal[0]
         delta_y = self.y - self.goal[1]
 
@@ -76,8 +108,10 @@ class Gatherer(DumbScouter):
         else:
             t = min(t_x, t_y)
 
+        # First hit square by projection
         symb_goal = (int(self.goal[0] + t * delta_x), int(self.goal[1] + t * delta_y))
 
+        # Iterate over t parameter until a touched square is found
         found = self.board.is_touched(symb_goal[0], symb_goal[1])
         while not found and t <= 1:
             inc = 1 / (self.board.width + self.board.height)
@@ -88,8 +122,11 @@ class Gatherer(DumbScouter):
         return symb_goal[0] - x0, symb_goal[1] - y0
 
     def best_way_to(self):
-        x0, y0 = max(0, self.x - self.sight_see), max(0, self.y - self.sight_see)
-        x1, y1 = min(self.board.width, self.x + self.sight_see + 1), min(self.board.height, self.y + self.sight_see + 1)
+        """
+        Inside sightline, compute pathfinding matrix, set local goal, compute and store path
+        """
+        x0, y0 = max(0, self.x - self.sightline), max(0, self.y - self.sightline)
+        x1, y1 = min(self.board.width, self.x + self.sightline + 1), min(self.board.height, self.y + self.sightline + 1)
 
         grid = Grid(matrix=self.get_matrix(x0, y0, x1, y1))
 
@@ -109,9 +146,16 @@ class Gatherer(DumbScouter):
             self.path[i] = (step[0] + x0, step[1] + y0)
 
     def reached(self, goal):
+        """
+        :param goal: a x,y tuple coordinate of the goal
+        :return: True if goal exists and has been reached
+        """
         return goal is not None and self.x == goal[0] and self.y == goal[1]
 
     def choose_goal(self):
+        """
+        :return: a new goal for ant, based on unreached known food
+        """
         if len(self.knowledge['food']) == 0:
             return None
         elif len(self.knowledge['food']) == 1:
@@ -126,22 +170,31 @@ class Gatherer(DumbScouter):
             return self.knowledge['food'][i]
 
     def reset(self):
+        """
+        Reset the ant including goal, path and position
+        """
         self.goal = None
         self.path = []
         self.x = 0
         self.y = 0
 
     def move(self):
+        """
+        Move ant towards set goal or compute a new goal if needed
+        """
+
         # Scouter has no more goal
         if self.goal is None or self.goal not in self.knowledge['food']:
             self.goal = self.choose_goal()
             self.path = []
 
-            # No goal
+            # No new goal found
             if self.goal is None:
                 return
 
         # Scouter has no more path to goal
+        # TODO Light compute could be integrated by only checking if next move is an autorized move
+        #  and otherwise recalculate
         if len(self.path) == 0 or not self.light_compute:
             self.best_way_to()
 
@@ -150,6 +203,7 @@ class Gatherer(DumbScouter):
                 self.goal = None
                 return
 
+        # Move the ant by one square
         new_pos = self.path[0]
         self.path = self.path[1:]
 

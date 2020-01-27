@@ -18,6 +18,9 @@ import cv2
 
 
 class LimitsMaker:
+    """
+    Setup 4 points to define limits and returns them
+    """
 
     def __init__(self, img, scale, window_name, name):
         self.limits = []
@@ -31,6 +34,11 @@ class LimitsMaker:
         self.name = name
 
     def add_limit(self, x, y):
+        """
+        Add the pixel at the given position in the limits
+        :param x: x value in the img
+        :param y: y value in the img
+        """
         x_img = int(x / self.scale)
         y_img = int(y / self.scale)
         self.limits.append((x_img, y_img))
@@ -72,6 +80,9 @@ class LimitsMaker:
         self.done = False
 
     def confirm(self):
+        """
+        Wait input key for clearing last color or ending food color setup
+        """
         print("--- " + self.name + ": Press enter if you're ok with data or any other key if you want to restart "
                                    "setup...")
         key = cv2.waitKey(0) & 0xFF

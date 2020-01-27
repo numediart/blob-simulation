@@ -1,6 +1,39 @@
 # Blob Simulation & Detection
 Détection d'un blob dans une image ainsi que détection des comprimés de nourriture. Simulation d'un blob dans PyGame à travers un système multi-agents à connaissance partagée.
 
+1. [How to use](HOWTO.md)
+2. [Requirements](#requirements)
+3. [Pour aller plus loin](TOGOFURTHER.md)
+4. [Releases](#releases)
+5. [License](#license)
+6. [Mentions légales](#mentions-legales)
+
+## How to use
+Vous trouverez la description détaille des différents scripts et des fichiers de configuration [ici](HOWTO.md).
+
+## Requirements
++ [Python 3.6.8](https://www.python.org/downloads/release/python-368/) - [Documentation](https://docs.python.org/3.6/)
++ [Numpy 1.16.4](https://pypi.org/project/numpy/1.16.4/) - BSD License
++ [Pathfinding 0.0.4](https://pypi.org/project/pathfinding/0.0.4/) - MIT License
++ [PyGame 1.9.6](https://pypi.org/project/pygame/1.9.6/) - LGPL License - [Documentation](https://www.pygame.org/docs/)
++ [Imutils 0.5.2](https://pypi.org/project/imutils/0.5.2/) - MIT License
++ [OpenCV Python 4.1.0.25](https://pypi.org/project/opencv-python/4.1.0.25/) - MIT License - [Documentation](https://docs.opencv.org/4.1.0/)
+
+## Pour aller plus loin
+Vous trouverez quelques articles scientifiques et conseils de lecture en lien avec le développement de ce projet [ici](TOGOFURTHER.md).
+
+## Releases
+## Release 2.2 - *24/06/2019*
+### Modifications : 
++ Ajout d'un fichier requirements.txt avec les versions des modules utilisées
++ Transformation de l'argument "input" en argument positionnel
+
+### Scripts : 
++ Setup : `python setup.py data/example.jpg`
++ Detection : `python detect.py data/example.jpg`
++ Simulation : `python play.py data/output-examples/example-detect.board -s 3`
++ Compare : `python compare.py data/output-examples/simulation/10_loops/10_loops.board data/output-examples/simulation/100_loops/100_loops.board -s 3`
+
 ## Release 2.1 - *7/06/2019*
 
 ### Modifications : 

@@ -20,11 +20,20 @@ import imutils
 
 
 def saturation(img):
+    """
+    :param img: a BGR numpy image
+    :return: the saturation of the image
+    """
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     return hsv[:, :, 1]
 
 
 def mean_image(images):
+    """
+
+    :param images: a list of one-channel images
+    :return: the pixel-by-pixel mean image
+    """
     mean = np.zeros(images[0].shape)
 
     for image in images:
@@ -35,10 +44,27 @@ def mean_image(images):
 
 # If percentage should be linked to a smaller region than whole image, fill img_ratio with factor value
 def mean_percent_value(img, img_ratio=1.0):
+    """
+    Calculate the mean percent value of an image.
+    :param img: the image to use
+    :param img_ratio: a ratio to adapt by if a blank image shouldn't be equal to 100%
+    :return: the mean value
+    """
     return np.sum(img, dtype=np.int64) / img_ratio / img.size / 255 * 100
 
 
 def find_food(img, min_food_size, lower_color_boundary, upper_color_boundary, kernel=None):
+    """
+    Detect food in the image based on color range.
+
+    :param img: the image to analyze
+    :param min_food_size: a minimal restriction to food size region
+    :param lower_color_boundary: the lower color range value
+    :param upper_color_boundary: the upper color range value
+    :param kernel: a structuring element to remove noise, by default an ellipsis of half minimal food size is used
+    :return: a list of detected foods regions (position and size), the corresponding mask
+        and an image with corresponding drawn regions
+    """
     img = img.copy()
     lower = np.array(lower_color_boundary, dtype="uint8")
     upper = np.array(upper_color_boundary, dtype="uint8")
@@ -69,9 +95,17 @@ def find_food(img, min_food_size, lower_color_boundary, upper_color_boundary, ke
     return foods, mask, img
 
 
-# Set area_ratio to 0 if you want to have the maximum possible blobs.
-# Otherwise adding of blobs is break when the next blob to add is smaller than the first blob times the area_ratio
 def find_blob(sat_img, max_blob=1, area_ratio=0.8, kernel=None):
+    """
+    Detect blob in the saturation image based on OTSU Thresholding (background-foreground separation)
+
+    :param sat_img: the image to analyze
+    :param max_blob: the maximum number of blob regions that has to be detected
+    :param area_ratio: a size ratio condition to add a new blob to the detected ones.
+        Detection is stopped if the new blob is smaller than the first one with respect to this ratio.
+    :param kernel: a structuring element used to remove noise. By default a 5-by-5 cross structure is used.
+    :return: a bitmask image of the pixels kept as being blob pixels
+    """
     blur = cv2.GaussianBlur(sat_img, (5, 5), 0)
     thresh = cv2.threshold(blur, 0, 255,
                            cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]

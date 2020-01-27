@@ -20,7 +20,16 @@ from simulation.player import Player
 
 
 def simulate(discrete_img, discrete_blob, discrete_food_list, config, refine=None):
+    """
+    Adapt discrete variables to simulation files.
 
+    :param discrete_img:
+    :param discrete_blob: a numpy image with blob quantity for each pixel
+    :param discrete_food_list: the list of all foods position
+    :param config: a dict config variables
+    :param refine: a json file to refine model
+    :return: board, player instances for simulation and an associated jpeg file
+    """
     height, width = discrete_blob.shape
 
     board = Board(width, height)
@@ -28,6 +37,7 @@ def simulate(discrete_img, discrete_blob, discrete_food_list, config, refine=Non
     player.food_size = compute_discrete_food_size(config, player.use_circle)
     player.clean_top = refine['Clean Top'] if refine is not None else True
 
+    # Add food to board
     for (x, y) in discrete_food_list:
         if board.is_touched(x, y):
             # TODO Set up value
@@ -35,26 +45,38 @@ def simulate(discrete_img, discrete_blob, discrete_food_list, config, refine=Non
         else:
             board.set_food(x, y)
 
+    # Add blob to board
     for x in range(width):
         for y in range(height):
             if discrete_blob[y, x] != 0:
                 board.update_blob(x, y, discrete_blob[y, x])
 
+    # Add missing information
     if refine is not None:
-        adapt_food(board, player, config, refine)
+        # TODO Adapt discrete_img to refine information
+        adapt_food(board, player, refine)
 
     return board, player, discrete_img
 
 
-def adapt_food(board, player, config, refine):
-    square_size = round(1 / refine["Width"] * config["Discrete Width"])
+def adapt_food(board, player, refine):
+    """
+    Refine food based on position given in refine file
+
+    :param board: the board instance to adapt
+    :param player: the player variables used to put food
+    :param refine: a json refine file with Width, Height and Foods position
+    """
+
+    square_size = round(1 / refine["Width"] * board.width)
 
     adding_food = 0
 
     for food_origin in refine["Foods"]:
-        discrete_food = (int(food_origin[0] / refine["Width"] * config["Discrete Width"]),
-                         int(food_origin[1] / refine["Height"] * config["Discrete Height"]))
+        discrete_food = (int(food_origin[0] / refine["Width"] * board.width),
+                         int(food_origin[1] / refine["Height"] * board.height))
 
+        # Search for food in the pixels corresponding to a real given coordinate
         food_found = False
         for i in range(square_size):
             for j in range(square_size):
@@ -71,6 +93,13 @@ def adapt_food(board, player, config, refine):
 
 
 def save(filename, board, player, img):
+    """
+    Save a simulation as 'filename' with given instances
+    :param filename: the filename to use
+    :param board: a board instance
+    :param player: a player instance
+    :param img: a numpy image
+    """
     with open(filename + ".board", 'w') as file:
         file.write(board.save())
 
@@ -81,7 +110,12 @@ def save(filename, board, player, img):
 
 
 def compute_discrete_food_size(config, use_circle=False):
-
+    """
+    Based on config variables, find the size food should have in simulation
+    :param config: a dict with config variables
+    :param use_circle: a boolean set to true if food should be circle rather than square
+    :return: the food size to use to fit with real size
+    """
     food_size = config["Min Food Size"]
     limits = config["Limits"]
     x_min = limits[0][0]

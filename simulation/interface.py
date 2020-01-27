@@ -25,6 +25,7 @@ from simulation.board import Board
 
 
 class Interface:
+    """ Interface to show blob process and let's user interact with it """
 
     FOOD_COLOR = (0, 150, 0)
     TOUCHED_COLOR = (50, 50, 0)
@@ -35,16 +36,19 @@ class Interface:
 
     def __init__(self, board, player, blob, scale, save_dir, mode, hidden=False, colors_file=None):
         """
-        :type board: Board
-        :type player: Player
-        :type blob: Blob_Manager
-        :type scale: float
-        :type save_dir: str
+        :param board: A board instance
+        :param player: A player instance
+        :param blob: A blob manager instance
+        :param scale: the scale to apply from board resolution to window resolution
+        :param save_dir: the save directory to use to save games
+        :param mode: a pygame mode flags
+        :param hidden: set to True if you want to keep interface hidden from user
+        :param colors_file: a color config file to modify interface colors
         """
-
         pygame.init()
         # pygame.key.set_repeat(5, 50)
 
+        # Reload colors if there is a file for
         if colors_file is not None:
             with open(colors_file, 'r') as file:
                 colors = json.load(file)
@@ -86,7 +90,9 @@ class Interface:
         self.discovered_food = pygame.transform.scale(discovered_food, (scale, scale))
 
     def draw(self):
-
+        """
+        Update interface and draw it again on the window
+        """
         width = self.board.width * self.scale
         height = self.board.height * self.scale
 
@@ -133,6 +139,10 @@ class Interface:
             pygame.display.flip()
 
     def save(self, name=None):
+        """
+        Store save files of the current state in given save directory
+        :param name: name used to save file, if none, use timestamp
+        """
         if name is None:
             name = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
 
@@ -156,6 +166,11 @@ class Interface:
         return name
 
     def event_listener(self, event):
+        """
+        Check the type of event or key used and apply correct interactions
+        :param event: the event recevied from user
+        :return: True if event has been used
+        """
 
         # ADMIN ACTIONS
         if event.type == KEYDOWN and event.key == 100:  # D Letter

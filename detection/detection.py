@@ -15,10 +15,21 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 from detection.utils import *
+from math import ceil
 
 
 def detect(input_file, config):
+    """
+    Starts blob detection in the image and returns
+    - the part of the image used (resized and warp perpective)
+    - blob mask detected
+    - blob segmented image
+    - food mask detected
+    - the image with food regions
 
+    :param input_file: string filename for jpeg image detection
+    :param config: dict with config used for detection
+    """
     img = cv2.imread(input_file)
     height, width, _ = img.shape
 
@@ -64,56 +75,62 @@ def detect(input_file, config):
     return img, blob_mask, blob, food_mask, food_img
 
 
-def print_results(orig, blob_mask, blob, food_mask, food, discrete, scale=1.0, filename=None, hide=False):
+def print_results(labels, images, scale=1.0, filename=None, hide=False, nbr_width=2):
+    """
+    Aggregate and show images in one window with each label displayed at the top of them.
+    It can as well save the aggregated image.
+    Each line contains 'nbr_width' images.
+    If the number of images doesn't fit the last line, it's padded with a zero image.
+
+    :param labels: each label to use for each image in images. assert len(labels) == len(images)
+    :param images: each image to print in results window
+    :param scale: the scale to use for results window with respect to image size
+    :param filename: if provide, save results window under 'filename'.jpg name
+    :param hide: if true, the results window isn't shown
+    :param nbr_width: number of images to fit in line
+    """
     padding = 35
-    nbr_width = 2
-    nbr_height = 3
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontsize = 0.45
     thickness = 1
 
-    scaled_height = int(orig.shape[0]*scale)
-    scaled_width = int(orig.shape[1]*scale)
+    scaled_height = int(images[0].shape[0]*scale)
+    scaled_width = int(images[0].shape[1]*scale)
+    pad = np.zeros((scaled_height, padding, 3), dtype=np.uint8)
+    line_pad = np.zeros((padding, (scaled_width + padding) * nbr_width + padding, 3), dtype=np.uint8)
+    img_pad = np.zeros((scaled_height, scaled_width, 3), dtype=np.uint8)
 
-    pad = np.zeros((scaled_height, padding, orig.shape[2]), dtype=np.uint8)
-    line_pad = np.zeros((padding, (scaled_width + padding) * nbr_width + padding, orig.shape[2]), dtype=np.uint8)
-    print_img = cv2.resize(orig, (scaled_width, scaled_height))
+    print_images = []
+    for image in images:
+        full_color = image if len(image.shape) == 3 else cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+        print_image = cv2.resize(full_color, (scaled_width, scaled_height))
+        print_images.append(print_image)
 
-    middle = ((0, int(scaled_height/2)), (scaled_width, int(scaled_height/2)))
-    cv2.line(print_img, middle[0], middle[1], (0, 255, 0), thickness=1)
-    cv2.putText(print_img, 'Mid Line', (middle[0][0] + 5, middle[0][1] - 5),
+    middle = ((0, int(scaled_height / 2)), (scaled_width, int(scaled_height / 2)))
+    cv2.line(print_images[0], middle[0], middle[1], (0, 255, 0), thickness=1)
+    cv2.putText(print_images[0], 'Mid Line', (middle[0][0] + 5, middle[0][1] - 5),
                 font, fontsize, (0, 255, 0), thickness, cv2.LINE_AA)
 
-    print_blob_mask = cv2.resize(cv2.cvtColor(blob_mask, cv2.COLOR_GRAY2BGR), (scaled_width, scaled_height))
-    print_blob = cv2.resize(blob, (scaled_width, scaled_height))
-    print_food_mask = cv2.resize(cv2.cvtColor(food_mask, cv2.COLOR_GRAY2BGR), (scaled_width, scaled_height))
-    print_food = cv2.resize(food, (scaled_width, scaled_height))
-    print_discrete = cv2.resize(discrete, (scaled_width, scaled_height))
+    lines = [line_pad]
+    for j in range(ceil(len(images)/nbr_width)):
+        concat_line = [pad]
+        for i in range(nbr_width):
+            if i + j * nbr_width < len(images):
+                concat_line.append(print_images[i + j * nbr_width])
+            else:
+                concat_line.append(img_pad)
+            concat_line.append(pad)
 
-    concat_line1 = np.concatenate((pad, print_img, pad, print_discrete, pad), axis=1)
-    concat_line2 = np.concatenate((pad, print_blob_mask, pad, print_blob, pad), axis=1)
-    concat_line3 = np.concatenate((pad, print_food_mask, pad, print_food, pad), axis=1)
+        lines.append(np.concatenate(tuple(concat_line), axis=1))
+        lines.append(line_pad)
 
-    aggregate = np.concatenate((line_pad, concat_line1, line_pad, concat_line2, line_pad, concat_line3, line_pad))
+    aggregate = np.concatenate(tuple(lines))
 
-    cv2.putText(aggregate, 'Original:',
-                (0 * (scaled_width + padding) + padding + 5, 0 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
-    cv2.putText(aggregate, 'Discrete:',
-                (1 * (scaled_width + padding) + padding + 5, 0 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
-    cv2.putText(aggregate, 'Blob Mask:',
-                (0 * (scaled_width + padding) + padding + 5, 1 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
-    cv2.putText(aggregate, 'Blob:',
-                (1 * (scaled_width + padding) + padding + 5, 1 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
-    cv2.putText(aggregate, 'Food Mask:',
-                (0 * (scaled_width + padding) + padding + 5, 2 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
-    cv2.putText(aggregate, 'Food Regions:',
-                (1 * (scaled_width + padding) + padding + 5, 2 * (scaled_height + padding) + padding - 5),
-                font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
+    for i in range(len(print_images)):
+        cv2.putText(aggregate, labels[i],
+                    ((i % nbr_width) * (scaled_width + padding) + padding + 5,
+                     int(i/nbr_width) * (scaled_height + padding) + padding - 5),
+                    font, fontsize, (255, 255, 255), thickness, cv2.LINE_AA)
 
     if filename is not None:
         cv2.imwrite(filename + ".jpg", aggregate)
@@ -125,6 +142,15 @@ def print_results(orig, blob_mask, blob, food_mask, food, discrete, scale=1.0, f
 
 
 def discretize(blob_img, food_mask, width, height):
+    """
+    Transform blob and foods into a numeric blob and foods with discrete 'width' and 'height' resolution
+
+    :param blob_img: a blob segmented numpy image
+    :param food_mask: a food mask numpy image
+    :param width: (int) the discrete width resolution
+    :param height: (int) the discrete height resolution
+    :return: the new image (as a saved simulated-like), the blob values in the image and the complete food position list
+    """
     img_height, img_width, _ = blob_img.shape
 
     discrete_blob = cv2.resize(blob_img, (width, height), interpolation=cv2.INTER_NEAREST)

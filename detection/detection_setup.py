@@ -27,6 +27,14 @@ from detection.food_colors import FoodColors
 
 
 def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
+    """
+    Display an image and show menu to setup every parameter in config.json file
+
+    :param setup_img: a image filename to use to setup "config.json" file
+    :param config_filename: the "config.json" file to load from and adapt
+    :param scale: the scale to use for window with respect to image size
+    :param bkp_path: path where old 'config_filename' will be saved for back up
+    """
     img = cv2.imread(setup_img)
     height, width, _ = img.shape
 
@@ -40,6 +48,7 @@ def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
     food_limits = FoodLimits(img, scale, window_name)
     setup_vars = {'Aspect Ratio': 1.0, 'Discrete Height': 100, 'Discrete Width': 100}
 
+    # Load previous configurations
     if path.exists(config_filename):
         with open(config_filename, "r") as file:
             config = json.load(file)
@@ -70,28 +79,26 @@ def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
     while not done:
         cv2.waitKey(10)
 
-        if state == 0:
+        if state == 0:  # Waiting commands
             cv2.imshow(window_name, cv2.resize(img, (0, 0), fx=scale, fy=scale))
             cv2.setMouseCallback(window_name, null_callback)
 
             key = input("Enter command: ")
 
-            if key == "q":
+            if key == "q":  # Quit without saving
                 done = True
 
-            elif key == "1":
+            elif key == "1":  # Setup board limits
                 state = 1
-                # board_setup.clear()
                 board_setup.help()
                 cv2.setMouseCallback(window_name, board_setup.on_mouse)
 
-            elif key == "2":
+            elif key == "2":  # Setup food color range
                 state = 2
-                # food_color.clear()
                 food_color.help()
                 cv2.setMouseCallback(window_name, food_color.on_mouse)
 
-            elif key == "3":
+            elif key == "3":  # Insert aspect ratio value
                 setup_vars['Aspect Ratio'] = -1
                 while setup_vars['Aspect Ratio'] <= 0:
                     try:
@@ -104,7 +111,7 @@ def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
 
                 show_menu()
 
-            elif key == "4":
+            elif key == "4":  # Insert discrete width and height values
                 setup_vars['Discrete Width'] = -1
                 while setup_vars['Discrete Width'] <= 0:
                     try:
@@ -125,16 +132,15 @@ def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
                     if setup_vars['Discrete Height'] <= 0:
                         print("Insert only round numbers.")
 
-
                 show_menu()
 
-            elif key == "5":
+            elif key == "5":  # Setup food size limits
                 state = 3
                 food_limits.clear()
                 food_limits.help()
                 cv2.setMouseCallback(window_name, food_limits.on_mouse)
 
-            elif key == "s":
+            elif key == "s":  # Save configuration
                 ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S-')
                 if path.exists(config_filename):
                     if not path.exists(bkp_path):
@@ -151,19 +157,19 @@ def setup(setup_img, config_filename, scale=1.0, bkp_path="detection/bkp/"):
                 print("Error: Unrecognised Command.")
                 show_menu()
 
-        elif state == 1:
+        elif state == 1:  # Adapt image to board limits setup
             board_setup.draw()
             if board_setup.done:
                 state = 0
                 show_menu()
 
-        elif state == 2:
+        elif state == 2:  # Adapt image to food color setup
             food_color.draw()
             if food_color.done:
                 state = 0
                 show_menu()
 
-        elif state == 3:
+        elif state == 3:  # Adapt image to food limits setup
             food_limits.draw()
             if food_limits.done:
                 state = 0

@@ -22,8 +22,8 @@ from os.path import splitext, basename, join
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--input", required=True, help="Uses this input as image for detection")
+    ap = argparse.ArgumentParser("Detect a blob and foods in an image.")
+    ap.add_argument("input", metavar="INPUT", help="Uses this input as image for detection")
     ap.add_argument("-s", "--scale", type=float, default=0.10, help="Scales images by this factor (default: x0.1)")
     ap.add_argument("-c", "--config", type=str, default="detection/config.json",
                     help="Loads config from this file (default: detection/config.json)")
@@ -57,7 +57,9 @@ def main():
     else:
         file_path = None
 
-    print_results(orig, blob_mask, blob, food_mask, food_img, dsc_img, args.scale, file_path, args.hide)
+    labels = ["Original", "Discrete", "Blob Mask", "Blob", "Food Mask", "Food Regions"]
+    images = [orig, img, blob_mask, blob, food_mask, food_img]
+    print_results(labels, images, args.scale, file_path, args.hide, nbr_width=2)
 
 
 if __name__ == "__main__":

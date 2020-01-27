@@ -19,7 +19,9 @@ import numpy as np
 
 
 class FoodColors:
-
+    """
+    Setup color range for foods by getting min and max values for r,g,b channels
+    """
     def __init__(self, img, scale, window_name):
         self.colors = []
         self.orig = img
@@ -29,12 +31,20 @@ class FoodColors:
         self.done = False
 
     def add(self, x, y):
+        """
+        Add the color pixel at the given position in the food range
+        :param x: x value in the img
+        :param y: y value in the img
+        """
         x_img = int(x / self.scale)
         y_img = int(y / self.scale)
         self.colors.append(self.orig[y_img, x_img])
         self.show_selected()
 
     def show_selected(self):
+        """
+        Adapt img pixels concerned by the actual range to red
+        """
         if len(self.colors) >= 2:
             low, high = self.compute()
             mask = cv2.inRange(self.img, np.array(low, dtype=np.uint8), np.array(high, dtype=np.uint8))
@@ -50,6 +60,10 @@ class FoodColors:
         self.confirm()
 
     def compute(self):
+        """
+        Compute color range
+        :return: first tuple is the lowest values found in colors for rgb channels, second tuple is for highest values
+        """
         low_color = [255, 255, 255]
         high_color = [0, 0, 0]
 
@@ -85,6 +99,9 @@ class FoodColors:
             self.add(x, y)
 
     def confirm(self):
+        """
+        Wait input key for clearing last color or ending food color setup
+        """
         key = cv2.waitKey(10) & 0xFF
         if key == 13:  # Enter
             print("--- Color Setup: " + str(self.compute()))

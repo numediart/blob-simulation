@@ -14,12 +14,15 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-import cv2
 from detection.limits_maker import LimitsMaker
 from math import sqrt
 
 
 class FoodLimits(LimitsMaker):
+    """
+    Based on LimitsMaker, modify displayed names and record config as a minimal distance
+    (and not 4 points as in LimitsMaker)
+    """
 
     def __init__(self, img, scale, window_name):
         LimitsMaker.__init__(self, img, scale, window_name, "Food Setup")
