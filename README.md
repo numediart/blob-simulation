@@ -6,7 +6,7 @@ Détection d'un blob dans une image ainsi que détection des comprimés de nourr
 3. [Pour aller plus loin](TOGOFURTHER.md)
 4. [Releases](#releases)
 5. [License](#license)
-6. [Mentions légales](#mentions-legales)
+6. [Mentions légales](#mentions-légales)
 
 ## How to use
 Vous trouverez la description détaille des différents scripts et des fichiers de configuration [ici](HOWTO.md).
