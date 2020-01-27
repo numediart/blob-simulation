@@ -1,6 +1,16 @@
 # Blob Simulation & Detection
 Détection d'un blob dans une image ainsi que détection des comprimés de nourriture. Simulation d'un blob dans PyGame à travers un système multi-agents à connaissance partagée.
 
+## Release 1.1 - *13/05/2019*
+Correction de bugs, réorganisation du code en dossiers et fichiers.
+Les trois exécutables se trouvent maintenant ici : 
++ Fichier de setup : `detection/setup.py`
++ Fichier de détection du blob dans une image : `detection/detect.py`
++ Fichier de simulation : `simulation/play.py`
+
+Pour essayer l'exemple, utiliser la commande : 
+`python main --save_dir example/ --init_from test`
+
 ## Release 1.0 - *02/05/2019*
 
 Première version d'un simulateur ainsi que de la détection dans une image.
@@ -12,7 +22,7 @@ Puis exécuter "detection/detector.py", le fichier board pour la simulation est 
 
 Le code "main.py" peut être lancé séparement ou à partir d'un fichier d'exemple.
 Pour avoir l'exemple, utiliser la commande : 
-`python main --save_dir example --init_from test`
+`python main --save_dir example/ --init_from test`
 Vous devriez alors voir apparaître la simulation suivante  : 
 
 ![Simulation screenshot](example/test.jpg?raw=true "Test Simulation") 

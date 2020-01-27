@@ -1,19 +1,3 @@
-# Copyright (C) 2019 - UMons
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 import cv2
 import numpy as np
 import imutils
@@ -33,8 +17,9 @@ def mean_image(images):
     return mean.astype(np.uint8)
 
 
-def mean_percent_value(img):
-    return np.sum(img, dtype=np.int64) / img.size / 255 * 100
+# If percentage should be linked to a smaller region than whole image, fill img_ratio with factor value
+def mean_percent_value(img, img_ratio=1.0):
+    return np.sum(img, dtype=np.int64) / img_ratio / img.size / 255 * 100
 
 
 def find_food(img, min_food_size, lower_color_boundary, upper_color_boundary, kernel=None):
@@ -81,8 +66,6 @@ def find_blob(sat_img, max_blob=1, area_ratio=0.8, kernel=None):
     cleaned = thresh
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_OPEN, kernel)
-
-    # Below code will show smoother blob zone but will include holes at well...
 
     contours, hierarchy = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 

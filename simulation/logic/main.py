@@ -1,26 +1,10 @@
-# Copyright (C) 2019 - UMons
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 import random
 import json
 
 # from ant import Ant
 # from gatherer import Gatherer
-from blob.fsm_ant import FSMAnt
-from board import Board
+from simulation.logic.fsm_ant import FSMAnt
+from simulation.board import Board
 
 
 class Blob_Manager:
@@ -44,22 +28,33 @@ class Blob_Manager:
     def save(self):
         return json.dumps(self.knowledge)
 
-    def load(self, file):
-        line = file.readline()
-        json_acceptable_string = line.replace("'", "\"")
-        k = json.loads(json_acceptable_string)
-        self.knowledge['food'] = [tuple(x) for x in k['food']]
-        self.knowledge['max_scouters'] = k['max_scouters']
+    def load(self, filename):
+        with open(filename, 'r') as file:
+            line = file.readline()
+            json_acceptable_string = line.replace("'", "\"")
+            k = json.loads(json_acceptable_string)
+            self.knowledge['food'] = [tuple(x) for x in k['food']]
+            self.knowledge['max_scouters'] = k['max_scouters']
 
-        while len(self.scouters) < self.knowledge['max_scouters']:
-            self.add_scouter()
+            while len(self.scouters) < self.knowledge['max_scouters']:
+                self.add_scouter()
 
     def move(self):
+        deads = []
         for scouter in self.scouters:
+            old = (scouter.x, scouter.y)
             scouter.move()
-            scouter.update()
+            if old == (scouter.x, scouter.y):
+                deads.append(scouter)
+            else:
+                scouter.update()
+
             if self.board.has_food(scouter.x, scouter.y) and (scouter.x, scouter.y) not in self.knowledge['food']:
                 self.food_discovered(scouter.x, scouter.y)
+
+        for dead in deads:
+            self.scouters.remove(dead)
+            self.add_scouter()
 
     def add_scouter(self):
         if len(self.scouters) < self.knowledge['max_scouters']:

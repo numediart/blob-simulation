@@ -1,28 +1,11 @@
-# Copyright (C) 2019 - UMons
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 import pygame
 import random
 import time
 import datetime
+import os.path
 
 from pygame.locals import *
-from board import Board
-from blob.main import Blob_Manager
-from player import Player
+from simulation.board import Board
 
 
 class Interface:
@@ -54,7 +37,9 @@ class Interface:
         height = self.board.height * scale
         self.window = pygame.display.set_mode((width, height))
 
-        discovered_food = pygame.image.load("cross.png").convert()
+        cross_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cross.png")
+
+        discovered_food = pygame.image.load(cross_file).convert()
         discovered_food.set_colorkey((255, 255, 255))
         self.discovered_food = pygame.transform.scale(discovered_food, (scale, scale))
 
@@ -94,6 +79,24 @@ class Interface:
             self.window.blit(self.discovered_food, (food[0] * self.scale, food[1] * self.scale))
         pygame.display.flip()
 
+    def save(self):
+        ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
+
+        print("Data saved at " + ts)
+        f = open(self.save_dir + ts + ".board", 'w')
+        f.write(self.board.save())
+        f.close()
+
+        f = open(self.save_dir + ts + ".blob", 'w')
+        f.write(self.blob.save())
+        f.close()
+
+        f = open(self.save_dir + ts + ".player", 'w')
+        f.write(self.player.save())
+        f.close()
+
+        pygame.image.save(self.window, self.save_dir + ts + ".jpg")
+
     def event_listener(self, event):
 
         # ADMIN ACTIONS
@@ -113,22 +116,7 @@ class Interface:
             self.show_ants = not self.show_ants
 
         elif event.type == KEYDOWN and event.key == 115:  # S Letter
-            ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S')
-
-            print("Data saved at " + ts)
-            f = open(self.save_dir + ts + ".board", 'w')
-            f.write(self.board.save())
-            f.close()
-
-            f = open(self.save_dir + ts + ".blob", 'w')
-            f.write(self.blob.save())
-            f.close()
-
-            f = open(self.save_dir + ts + ".player", 'w')
-            f.write(self.player.save())
-            f.close()
-
-            pygame.image.save(self.window, self.save_dir + ts + ".jpg")
+            self.save()
 
         # DEBUG ACTIONS
         elif self.debug_mode and event.type == MOUSEBUTTONDOWN and event.button == 1:  # Right Click
@@ -142,7 +130,7 @@ class Interface:
             y = int(pygame.mouse.get_pos()[1]/self.scale)
             self.player.set_food(x, y)
 
-        elif event.type == KEYDOWN and event.key == 110:  # N Letter
+        elif event.type == KEYDOWN and event.key == 99:  # C Letter
             self.player.clean_board()
 
         elif event.type == KEYDOWN and event.key == 114:  # R Letter
@@ -160,10 +148,11 @@ class Interface:
             self.do_step = True
 
         elif event.type == KEYDOWN and event.key == 107:  # K Letter
-            nbr = random.randrange(len(self.blob.scouters))
-            self.blob.knowledge['max_scouters'] -= 1
-            del self.blob.scouters[nbr]
-            print("Scouter killed ! - Total : " + str(len(self.blob.scouters)))
+            if len(self.blob.scouters) > 0:
+                nbr = random.randrange(len(self.blob.scouters))
+                self.blob.knowledge['max_scouters'] -= 1
+                del self.blob.scouters[nbr]
+                print("Scouter killed ! - Total : " + str(len(self.blob.scouters)))
 
         elif event.type == KEYDOWN and event.key == 113:  # A letter
             self.blob.knowledge['max_scouters'] += 1

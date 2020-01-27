@@ -1,19 +1,3 @@
-# Copyright (C) 2019 - UMons
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 import numpy as np
 
 
@@ -42,19 +26,25 @@ class Board:
 
         return stream.rstrip('\n')
 
-    def load(self, file):
-        y = 0
-        for line in file:
-            nodes = line.split(' ')
-            if len(nodes) != self.width:
-                print("Error with initialized height !" + str(len(nodes)))
+    def load(self, filename):
+        with open(filename, 'r') as file:
+            dim = file.readline()
+            dims = dim.split(' ')
+            if dims[0] != self.width and dims[1] != self.height:
+                self.__init__(int(dims[0]), int(dims[1]))
 
-            x = 0
-            for node in nodes:
-                self.board_array[x, y].load(node)
-                x += 1
+            y = 0
+            for line in file:
+                nodes = line.split(' ')
+                if len(nodes) != self.width:
+                    print("Error with given height !" + str(len(nodes)))
 
-            y += 1
+                x = 0
+                for node in nodes:
+                    self.board_array[x, y].load(node)
+                    x += 1
+
+                y += 1
 
     def has_food(self, x, y):
         return self.inside(x, y) and self.board_array[x, y].food

@@ -1,27 +1,11 @@
-# Copyright (C) 2019 - UMons
-# 
-# This library is free software; you can redistribute it and/or
-# modify it under the terms of the GNU Lesser General Public
-# License as published by the Free Software Foundation; either
-# version 2.1 of the License, or (at your option) any later version.
-# 
-# This library is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# Lesser General Public License for more details.
-# 
-# You should have received a copy of the GNU Lesser General Public
-# License along with this library; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
 import random
 
 from pathfinding.core.diagonal_movement import DiagonalMovement
 from pathfinding.core.grid import Grid
 from pathfinding.finder.a_star import AStarFinder
 
-from board import Board
-from blob.dumb_scouter import DumbScouter
+from simulation.board import Board
+from simulation.logic.dumb_scouter import DumbScouter
 
 
 class Gatherer(DumbScouter):
@@ -57,6 +41,7 @@ class Gatherer(DumbScouter):
             finder = AStarFinder(diagonal_movement=DiagonalMovement.never)
 
         self.path, runs = finder.find_path(start, end, grid)
+        self.path = self.path[1:]
 
     def reached(self, goal):
         return goal is not None and self.x == goal[0] and self.y == goal[1]
