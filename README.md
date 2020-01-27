@@ -9,7 +9,7 @@ Les trois exécutables se trouvent maintenant ici :
 + Fichier de simulation : `simulation/play.py`
 
 Pour essayer l'exemple, utiliser la commande : 
-`python main --save_dir example/ --init_from test`
+`python simulation/play.py --save_dir example/ --init_from test`
 
 ## Release 1.0 - *02/05/2019*
 
@@ -22,7 +22,7 @@ Puis exécuter "detection/detector.py", le fichier board pour la simulation est 
 
 Le code "main.py" peut être lancé séparement ou à partir d'un fichier d'exemple.
 Pour avoir l'exemple, utiliser la commande : 
-`python main --save_dir example/ --init_from test`
+`python main.py --save_dir example/ --init_from test`
 Vous devriez alors voir apparaître la simulation suivante  : 
 
 ![Simulation screenshot](example/test.jpg?raw=true "Test Simulation") 
