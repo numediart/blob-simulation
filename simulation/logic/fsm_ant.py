@@ -18,39 +18,37 @@ from simulation.board import Board
 from simulation.logic.dumb_scouter import DumbScouter
 from simulation.logic.gatherer import Gatherer
 from simulation.logic.sensing_scouter import SensingScouter
+from simulation.logic.advanced_scouter import AdvancedScouter
 
 
 class FSMAnt(DumbScouter):
 
-    # Max value an ant has to store to stop being starved
-    MAX_HARVESTING = 100
-
-    # Value an ant eat to do a step
-    EAT_VALUE = 1
-
-    # Value an ant collect by stepping on food
-    HARVEST_VALUE = 10
+    """
+        Knowledge used:
+            - min_harvest: (float) Min value an ant has to store to stop being starved
+            - max_harvest: (float) Max value an ant can carry
+            - eat: (float) Value an ant eat to do a step
+            - harvest: (float) Value an ant collect by stepping on food
+            - use_diagonal: (bool) Allow ants to use diagonals to travel
+    """
 
     # Multiplication factor for drop value (see blob variable) when an ant is starving
     RATIO_DROP_STARVE = 2
 
-    USE_DIAGONAL = False
-
-    def __init__(self, board, knowledge, x, y, drop_value):
+    def __init__(self, board, knowledge, x, y):
         """
         :type board: Board
         :type knowledge: dict
         :type x: int
         :type y: int
-        :type drop_value: float
         """
-        DumbScouter.__init__(self, board, knowledge, x, y, drop_value)
-        self.gatherer_logic = Gatherer(board, knowledge, x, y, drop_value, FSMAnt.USE_DIAGONAL)
-        self.scouting_logic = SensingScouter(board, knowledge, x, y, drop_value)
+        DumbScouter.__init__(self, board, knowledge, x, y)
+        self.gatherer_logic = Gatherer(board, knowledge, x, y, self.knowledge["use_diagonal"])
+        self.scouting_logic = AdvancedScouter(board, knowledge, x, y, self.knowledge["use_diagonal"])
 
-        self.harvest = FSMAnt.MAX_HARVESTING
+        self.stored = self.knowledge["min_harvest"]
         self.starving = False
-        self.init_drop = drop_value
+        self.init_drop = self.knowledge['drop']
 
     def move(self):
         if self.starving:
@@ -68,31 +66,38 @@ class FSMAnt(DumbScouter):
         self.gatherer_logic.y = self.y
 
     def init_scouting(self):
+        self.scouting_logic.reset()
         self.scouting_logic.x = self.x
         self.scouting_logic.y = self.y
-        self.drop_value = self.init_drop
+        self.drop = self.init_drop
 
     def update(self):
-        if self.harvest > 0 and self.starving:
-            self.drop_value = FSMAnt.RATIO_DROP_STARVE * self.init_drop
+        # if self.harvest > 0 and self.starving:
+        #     self.drop = FSMAnt.RATIO_DROP_STARVE * self.init_drop
 
+        self.drop = self.init_drop * self.stored
         DumbScouter.update(self)
 
-        if len(self.knowledge['food']) != 0 and not self.starving:
-            self.harvest -= FSMAnt.EAT_VALUE
-            self.harvest = max(0, self.harvest)
+        if not self.starving:
+            self.stored -= self.knowledge["eat"]
+            self.stored = max(0, self.stored)
 
         if self.board.has_food(self.x, self.y):
             if len(self.knowledge['food']) == 1:
-                self.harvest = FSMAnt.MAX_HARVESTING
+                wanted = min(self.knowledge["min_harvest"], self.knowledge["max_harvest"] - self.stored)
             else:
-                self.harvest += FSMAnt.HARVEST_VALUE
-                self.harvest = min(self.harvest, FSMAnt.MAX_HARVESTING)
+                wanted = min(self.knowledge["harvest"], self.knowledge["max_harvest"] - self.stored)
 
-        if self.harvest == 0 and not self.starving:
+            received, finished = self.board.eat_food(self.x, self.y, wanted)
+            self.stored += received
+
+            if finished:
+                self.knowledge['food'].remove((self.x, self.y))
+
+        if self.stored == 0 and not self.starving:
             self.starving = True
             self.init_gathering()
 
-        if self.harvest == FSMAnt.MAX_HARVESTING and self.starving:
+        if self.stored >= self.knowledge["min_harvest"] and self.starving:
             self.starving = False
             self.init_scouting()

@@ -1,1 +1,22 @@
-{"Aspect Ratio": 0.4, "Discrete Height": 40, "Discrete Width": 100, "Limits": [[136, 268], [5484, 208], [5452, 3296], [136, 3308]], "Low Food Color": [92, 140, 168], "High Food Color": [202, 226, 238]}
+{
+    "Aspect Ratio": 0.4,
+    "Discrete Height": 240,
+    "Discrete Width": 600,
+    "High Food Color": [
+        214,
+        230,
+        237
+    ],
+    "Limits": [
+		[136, 268],
+		[5484, 208],
+		[5452, 3296], 
+		[136, 3308]
+	],
+    "Low Food Color": [
+        150,
+        185,
+        198
+    ],
+	"Min Food Size": 60
+}

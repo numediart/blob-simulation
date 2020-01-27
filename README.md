@@ -1,6 +1,31 @@
 # Blob Simulation & Detection
 Détection d'un blob dans une image ainsi que détection des comprimés de nourriture. Simulation d'un blob dans PyGame à travers un système multi-agents à connaissance partagée.
 
+## Release 2.0 - *27/05/2019*
+
+Le passage à cette release invalide les fichiers de sauvegarde précédents, le format ayant été modifié.
+
+### Modifications :
++ Logique du blob améliorée (les fourmis ont un horizon de vue, les exploratrices ont deux modes de fonctionnement et le blob calcule mieux la quantité de fourmis qu’il peut utiliser)
++ Utilisation de la nourriture améliorée (le lien entre détection et virtuel est plus réaliste, la nourriture peut s’épuiser et il est plus facile d’ajouter ou retirer de la nourriture en grande quantité)
++ Transformation d'une série de fichiers vers un format json (notamment les fichiers player et blob)
++ Déplacement d'une série de variables dans des fichiers de configuration et création des fichiers de configuration "par défaut"
++ Simplification du changement de couleurs de l'interface
++ Ajout d'un script de comparaison entre deux sauvegardes
+
+La nouvelle interface de la simulation produira des images comme celle-ci : 
+
+![Interface de simulation](example/test-run.jpg?raw=true "Interface de simulation") 
+
+
+Pour exécuter le script de comparaison sur un exemple : 
+`python compare.py --first example/test.board --second example/test-run.board`
+
+L'image affichée sera la suivante : 
+
+![Comparaison entre deux simulations](example/test-compare.jpg?raw=true "Comparaison entre deux simulations") 
+
+
 ## Release 1.1 - *13/05/2019*
 Correction de bugs, réorganisation du code en dossiers et fichiers.
 Les trois exécutables se trouvent maintenant ici : 

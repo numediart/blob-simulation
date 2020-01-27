@@ -16,36 +16,43 @@
 
 from math import ceil
 from random import randrange
+import json
 
 from simulation.board import Board
 
 
 class Player:
 
-    def __init__(self, board, blob):
+    def __init__(self, board, blob, default_config):
         """
         :type blob: Blob_Manager
         :type board: Board
         """
         self.board = board
         self.blob = blob
-        self.clean_top = True
+
+        with open(default_config, 'r') as file:
+            d = json.load(file)
+
+        self.clean_top = d['clean_top']
+        self.food_size = d['food_size']
+        self.use_circle = d['use_food_circle']
 
     def save(self):
-        return format(self.clean_top, 'd')
-
-    def load(self, filename):
-        with open(filename, 'r') as file:
-            self.clean_top = file.readline() == '1'
+        d = dict()
+        d['clean_top'] = self.clean_top
+        d['food_size'] = self.food_size
+        d['use_food_circle'] = self.use_circle
+        return json.dumps(d, indent=4, sort_keys=True)
 
     def set_random_food(self, qt, random_top=None):
         if random_top is None:  # Randomize over all the board
             y_offset = 0
             y_range = self.board.height
-        if random_top:  # Randomize over the half top board
+        elif random_top:  # Randomize over the half top board
             y_offset = 0
             y_range = ceil(self.board.height / 2)
-        elif not random_top:  # Randomize over the half bottom board
+        else:  # Randomize over the half bottom board
             y_offset = int(self.board.height / 2)
             y_range = ceil(self.board.height / 2)
 
@@ -57,14 +64,31 @@ class Player:
                 if self.set_food(x, y):
                     foods += 1
 
-    def set_food(self, x, y, size=1):
-        food_put = False
+    def remove_food(self, x, y):
+        food_remove = False
+        x0, y0 = int(x - self.food_size / 2), int(y - self.food_size / 2)
+        for x_size in range(self.food_size):
+            for y_size in range(self.food_size):
+                if not self.use_circle or (x_size - self.food_size / 2) ** 2 + (y_size - self.food_size / 2) ** 2 <= \
+                        (self.food_size / 2 - 0.5) ** 2:
+                    if self.board.inside(x0 + x_size, y0 + y_size) and not self.board.is_touched(x0 + x_size,
+                                                                                                 y0 + y_size):
+                        self.board.remove_food(x0 + x_size, y0 + y_size)
+                        food_remove = True
 
-        for x_size in range(size):
-            for y_size in range(size):
-                if 0 <= x + x_size < self.board.width and 0 <= y + y_size < self.board.height:
-                    if not self.board.board_array[x + x_size, y + y_size].touched:
-                        self.board.board_array[x + x_size, y + y_size].food = True
+        if not food_remove:
+            print("Blob already found it !")
+
+    def set_food(self, x, y):
+        food_put = False
+        x0, y0 = int(x - self.food_size / 2), int(y - self.food_size / 2)
+        for x_size in range(self.food_size):
+            for y_size in range(self.food_size):
+                if not self.use_circle or (x_size - self.food_size / 2) ** 2 + (y_size - self.food_size / 2) ** 2 <= \
+                        (self.food_size / 2 - 0.5) ** 2:
+                    if self.board.inside(x0 + x_size, y0 + y_size) and not self.board.is_touched(x0 + x_size,
+                                                                                                 y0 + y_size):
+                        self.board.set_food(x0 + x_size, y0 + y_size)
                         food_put = True
 
         if not food_put:
@@ -73,13 +97,8 @@ class Player:
 
         return True
 
-    def check_blob_size(self):
-        size = 0
-        for x in range(self.board.width):
-            for y in range(self.board.height):
-                if self.board.board_array[x, y].touched:
-                    size += 1
-        return size/(self.board.width * self.board.height) * 100
+    def check_blob_cover(self):
+        return self.board.get_cover(1), self.board.get_cover(2)
 
     def clean_board(self):
         y_range = ceil(self.board.height/2)

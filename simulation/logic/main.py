@@ -25,35 +25,34 @@ from simulation.board import Board
 
 class Blob_Manager:
 
-    DROP_VALUE = 25
-
-    def __init__(self, board, max_scouters):
+    def __init__(self, board, default_knowledge):
         """
         :type board: Board
-        :type max_scouters: int
         """
         self.board = board
         self.knowledge = dict()
-        self.knowledge['food'] = []
-        self.knowledge['max_scouters'] = max_scouters
         self.scouters = []
 
-        for _ in range(max_scouters):
+        with open(default_knowledge, 'r') as file:
+            self.knowledge.update(json.load(file))
+
+        self.knowledge['food'] = []
+        for x in range(self.board.width):
+            for y in range(self.board.height):
+                if self.board.has_food(x, y) and self.board.is_touched(x, y):
+                    self.knowledge['food'].append((x, y))
+
+        self.knowledge['max_scouters'] = self.compute_max_scouters()
+        while len(self.scouters) < self.knowledge['max_scouters']:
             self.add_scouter()
 
+        print("Scouters: " + str(len(self.scouters)))
+
     def save(self):
-        return json.dumps(self.knowledge)
-
-    def load(self, filename):
-        with open(filename, 'r') as file:
-            line = file.readline()
-            json_acceptable_string = line.replace("'", "\"")
-            k = json.loads(json_acceptable_string)
-            self.knowledge['food'] = [tuple(x) for x in k['food']]
-            self.knowledge['max_scouters'] = k['max_scouters']
-
-            while len(self.scouters) < self.knowledge['max_scouters']:
-                self.add_scouter()
+        d = self.knowledge.copy()
+        del d["food"]
+        del d["max_scouters"]
+        return json.dumps(d, indent=4, sort_keys=True)
 
     def move(self):
         deads = []
@@ -63,10 +62,26 @@ class Blob_Manager:
             if old == (scouter.x, scouter.y):
                 deads.append(scouter)
             else:
+                if self.board.has_food(scouter.x, scouter.y) and (scouter.x, scouter.y) not in self.knowledge['food']:
+                    self.food_discovered(scouter.x, scouter.y)
+
                 scouter.update()
 
-            if self.board.has_food(scouter.x, scouter.y) and (scouter.x, scouter.y) not in self.knowledge['food']:
-                self.food_discovered(scouter.x, scouter.y)
+        new_max = self.compute_max_scouters()
+        if new_max != self.knowledge['max_scouters']:
+            print("Scouters: " + str(new_max))
+        self.knowledge['max_scouters'] = new_max
+
+        scouters_qt = len(self.scouters)
+        diff = self.knowledge['max_scouters'] - scouters_qt
+
+        if diff > 0:
+            for _ in range(diff):
+                self.add_scouter()
+
+        elif diff < 0:
+            for _ in range(-diff):
+                self.remove_scouter()
 
         for dead in deads:
             self.scouters.remove(dead)
@@ -78,13 +93,52 @@ class Blob_Manager:
                 index = random.randrange(len(self.knowledge['food']))
                 (x, y) = self.knowledge['food'][index]
             else:
-                print("This will be nice in the future")
-                x = 0
-                y = 0
+                x, y = self.find_blob_square()
 
-            self.scouters.append(FSMAnt(self.board, self.knowledge, x, y, Blob_Manager.DROP_VALUE))
+            self.scouters.append(FSMAnt(self.board, self.knowledge, x, y))
         else:
             print("Max scouters already reached !")
+
+    def remove_scouter(self):
+        nbr = random.randrange(len(self.scouters))
+        del self.scouters[nbr]
+
+    def compute_max_scouters(self):
+        real_size_factor = 1 / 360
+        blob_size_factor = 3 / 4
+        cover_factor = 1 / 4
+
+        blob_qt = self.board.get_blob_total()
+
+        scouters_by_cover = int(self.board.get_cover())
+        scouters_by_size = int(blob_qt)
+
+        total_scouters = int((blob_size_factor * scouters_by_size + cover_factor * scouters_by_cover)
+                             * (real_size_factor * self.board.height * self.board.width / 100))
+
+        return max(self.knowledge['min_scouters'], total_scouters)
+
+    def find_blob_square(self):
+        availables = []
+        total_blob = 0
+        for x in range(self.board.width):
+            for y in range(self.board.height):
+                if self.board.is_touched(x, y):
+                    qt = self.board.get_blob(x, y) + 1
+                    total_blob += qt
+                    availables.append(((x, y), qt))
+
+        if len(availables) == 0:
+            return 0, 0
+
+        # Random need cast to integer
+        # Floor cast will make sure a solution is found
+        index_pond = random.randrange(int(total_blob))
+        acc = 0
+        for square, qt in availables:
+            acc += qt
+            if acc >= index_pond:
+                return square
 
     def reset(self, x, y):
         for scouter in self.scouters.copy():
@@ -98,9 +152,12 @@ class Blob_Manager:
 
     def food_discovered(self, x, y):
         self.knowledge['food'].append((x, y))
-        self.knowledge['max_scouters'] += 1
+        # self.knowledge['max_scouters'] += 1
 
-        for _ in range(1):
-            self.scouters.append(FSMAnt(self.board, self.knowledge, x, y, Blob_Manager.DROP_VALUE))
+        # for _ in range(1):
+        #     self.scouters.append(FSMAnt(self.board, self.knowledge, x, y, Blob_Manager.DROP_VALUE))
 
-        print("Food discovered in (" + str(x) + ", " + str(y) + ") - Total scouters : " + str(len(self.scouters)))
+        # print("Food discovered in (" + str(x) + ", " + str(y) + ")")
+
+    def food_destroyed(self, x, y):
+        self.knowledge['food'].remove((x, y))

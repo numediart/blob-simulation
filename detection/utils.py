@@ -46,7 +46,7 @@ def find_food(img, min_food_size, lower_color_boundary, upper_color_boundary, ke
     mask = cv2.inRange(img, lower, upper)
 
     if kernel is None:
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (10, 10))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(min_food_size/2), int(min_food_size/2)))
 
     cleaned = mask
     cleaned = cv2.morphologyEx(cleaned, cv2.MORPH_CLOSE, kernel)

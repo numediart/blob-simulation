@@ -15,7 +15,6 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 import pygame
-import random
 import time
 import datetime
 import os.path
@@ -25,6 +24,12 @@ from simulation.board import Board
 
 
 class Interface:
+
+    FOOD_COLOR = (244, 210, 128) # (0, 150, 0)
+    TOUCHED_COLOR = (218, 196, 136) # (50, 50, 0)
+    BLOB_LOWER_COLOR = (206, 182, 86) # (255, 255, 0)
+    BLOB_HIGHER_COLOR = (162, 106, 59) # (255, 0, 0)
+    BACKGROUND = (120, 120, 120)
 
     def __init__(self, board, player, blob, scale, save_dir):
         """
@@ -65,26 +70,34 @@ class Interface:
         height = self.board.height * self.scale
 
         game_surface = pygame.Surface((self.board.width, self.board.height))
-        board_array = pygame.PixelArray(game_surface)
+        pixel_array = pygame.PixelArray(game_surface)
+
         for x in range(self.board.width):
             for y in range(self.board.height):
-                board_array[x,y] = (0,0,0)
-                if self.board.is_touched(x, y):
-                    board_array[x, y] = (50, 50, 0)
-
-                val = self.board.get_blob(x, y)
-                val = max(0, min(val, 255))
-                if val != 0:
-                    board_array[x, y] = (255, 255 - val, 0)
+                pixel_array[x, y] = Interface.BACKGROUND
 
                 if self.board.has_food(x, y):
-                    board_array[x, y] = (0, 150, 0)
+                    pixel_array[x, y] = Interface.FOOD_COLOR
 
-                if self.show_ants:
-                    for scouter in self.blob.scouters:
-                        board_array[scouter.x, scouter.y] = (255, 255, 255)
+                if self.board.is_touched(x, y):
+                    pixel_array[x, y] = Interface.TOUCHED_COLOR
 
-        del board_array
+                val = self.board.get_blob(x, y)
+                if val != Board.MIN_BLOB:
+                    val = (val - Board.MIN_BLOB) / (Board.MAX_BLOB - Board.MIN_BLOB)
+                    red = (Interface.BLOB_HIGHER_COLOR[0] - Interface.BLOB_LOWER_COLOR[0]) * val + \
+                          Interface.BLOB_LOWER_COLOR[0]
+                    green = (Interface.BLOB_HIGHER_COLOR[1] - Interface.BLOB_LOWER_COLOR[1]) * val + \
+                          Interface.BLOB_LOWER_COLOR[1]
+                    blue = (Interface.BLOB_HIGHER_COLOR[2] - Interface.BLOB_LOWER_COLOR[2]) * val + \
+                          Interface.BLOB_LOWER_COLOR[2]
+                    pixel_array[x, y] = (red, green, blue)
+
+        if self.show_ants:
+            for scouter in self.blob.scouters:
+                pixel_array[scouter.x, scouter.y] = (255, 255, 255)
+
+        del pixel_array
 
         game_window = pygame.transform.scale(game_surface, (width, height))
 
@@ -103,11 +116,11 @@ class Interface:
         f.write(self.board.save())
         f.close()
 
-        f = open(self.save_dir + ts + ".blob", 'w')
+        f = open(self.save_dir + ts + ".blob.json", 'w')
         f.write(self.blob.save())
         f.close()
 
-        f = open(self.save_dir + ts + ".player", 'w')
+        f = open(self.save_dir + ts + ".player.json", 'w')
         f.write(self.player.save())
         f.close()
 
@@ -144,7 +157,10 @@ class Interface:
         elif event.type == MOUSEBUTTONDOWN and event.button == 1:  # Right Click
             x = int(pygame.mouse.get_pos()[0]/self.scale)
             y = int(pygame.mouse.get_pos()[1]/self.scale)
-            self.player.set_food(x, y)
+            if self.board.has_food(x, y):
+                self.player.remove_food(x, y)
+            else:
+                self.player.set_food(x, y)
 
         elif event.type == KEYDOWN and event.key == 99:  # C Letter
             self.player.clean_board()
@@ -153,8 +169,11 @@ class Interface:
             self.player.set_random_food(10, not self.player.clean_top)
 
         elif event.type == KEYDOWN and event.key == 104:  # H Letter
-            size_percent = self.player.check_blob_size()
-            print("Current blob size percent: " + str(size_percent))
+            up_size_percent, down_size_percent = self.player.check_blob_cover()
+            print("Blob covering:")
+            print("\t{:.2f}% of the board.".format((up_size_percent + down_size_percent)/2))
+            print("\t{:.2f}% of the upper board.".format(up_size_percent))
+            print("\t{:.2f}% of the lower board.".format(down_size_percent))
 
         # BLOB ACTIONS
         elif event.type == KEYDOWN and event.key == 112:  # P Letter
@@ -164,16 +183,13 @@ class Interface:
             self.do_step = True
 
         elif event.type == KEYDOWN and event.key == 107:  # K Letter
-            if len(self.blob.scouters) > 0:
-                nbr = random.randrange(len(self.blob.scouters))
-                self.blob.knowledge['max_scouters'] -= 1
-                del self.blob.scouters[nbr]
-                print("Scouter killed ! - Total : " + str(len(self.blob.scouters)))
+            if self.blob.knowledge['min_scouters'] > 0:
+                self.blob.knowledge['min_scouters'] -= 1
+                print("New minimal scouters : " + str(self.blob.knowledge['min_scouters']) + " - Currently : " + str(len(self.blob.scouters)))
 
         elif event.type == KEYDOWN and event.key == 113:  # A letter
-            self.blob.knowledge['max_scouters'] += 1
-            self.blob.add_scouter()
-            print("New scouter ! - Total : " + str(len(self.blob.scouters)))
+            self.blob.knowledge['min_scouters'] += 1
+            print("New minimal scouters : " + str(self.blob.knowledge['min_scouters']) + " - Currently : " + str(len(self.blob.scouters)))
 
         elif event.type == KEYDOWN:
             print("Unrecognised key code : " + str(event.key))

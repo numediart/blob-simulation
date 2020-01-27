@@ -17,7 +17,7 @@
 import pygame
 import argparse
 import time
-from os.path import exists
+from os.path import exists, join, splitext
 
 from pygame.locals import QUIT
 from simulation.interface import Interface
@@ -32,10 +32,10 @@ def main():
                         help='Board height resolution (default = 40)')
     parser.add_argument('--width', type=int, default=100,
                         help='Board width resolution (default = 100)')
-    parser.add_argument('--scale', type=int, default=10,
+    parser.add_argument('-s', '--scale', type=int, default=10,
                         help='Scaling from board resolution to window resolution (default = x10)')
     parser.add_argument('--init_from', type=str,
-                        help='Initialize game from a save. Pass the filename in saved dir without extension.')
+                        help='Initialize game from a save. Pass the board filename')
     parser.add_argument('--save_dir', type=str, default="save/",
                         help='Directory where saves are stored.')
     parser.add_argument('--computing_ratio', type=int, default=1,
@@ -43,24 +43,28 @@ def main():
 
     args = parser.parse_args()
 
+    default_dir = "simulation/default"
+    player_file = join(default_dir, "player.json")
+    blob_file = join(default_dir, "blob.json")
+
     if args.init_from is not None:
-        init_scouters = 0
+        board_file = join(args.save_dir, args.init_from)
+        assert exists(board_file)
+        root_name = splitext(board_file)[0]
+
+        board = Board(args.width, args.height)
+        board.load(args.save_dir + args.init_from)
+
+        if exists(root_name + ".player.json"):
+            player_file = root_name + ".player.json"
+
+        if exists(root_name + ".blob.json"):
+            blob_file = root_name + ".blob.json"
     else:
-        init_scouters = 3
+        board = Board(args.width, args.height)
 
-    board = Board(args.width, args.height)
-    blob = Blob_Manager(board, init_scouters)
-    player = Player(board, blob)
-
-    # TODO Overwrite given size by size in file (if we saved it...) ?
-    if args.init_from is not None:
-        assert exists(args.save_dir + args.init_from + ".board") \
-               and exists(args.save_dir + args.init_from + ".blob") \
-               and exists(args.save_dir + args.init_from + ".player")
-
-        board.load(args.save_dir + args.init_from + ".board")
-        blob.load(args.save_dir + args.init_from + ".blob")
-        player.load(args.save_dir + args.init_from + ".player")
+    blob = Blob_Manager(board, blob_file)
+    player = Player(board, blob, player_file)
 
     gui = Interface(board, player, blob, args.scale, args.save_dir)
 

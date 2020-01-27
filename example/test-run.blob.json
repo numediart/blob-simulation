@@ -1,0 +1,11 @@
+{
+    "drop": 1,
+    "eat": 1,
+    "explore_ratio": 0.2,
+    "harvest": 10,
+    "max_harvest": 200,
+    "min_harvest": 100,
+    "min_scouters": 2,
+    "search_local_on_food": true,
+    "use_diagonal": true
+}

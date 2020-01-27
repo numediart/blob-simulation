@@ -19,24 +19,27 @@ import numpy as np
 
 class Board:
 
-    MAX_BLOB = 255
+    MAX_BLOB = 255.0
+    MIN_BLOB = 0.0
+    MIN_FOOD_BLOB = 50
     DECREASE_BLOB = 0.1
+    INIT_FOOD = 100
 
     def __init__(self, width, height):
         self.width = width
         self.height = height
 
-        self.board_array = np.empty(shape=(width, height), dtype=object)
-        for x in range(self.width):
-            for y in range(self.height):
-                self.board_array[x, y] = Square()
+        self.dropped_blob = np.zeros(shape=(width, height), dtype=float)
+        self.foods = np.zeros(shape=(width, height), dtype=float)
+        self.touched = np.zeros(shape=(width, height), dtype=bool)
 
     def save(self):
-        stream = ''
+        stream = str(self.width) + ' ' + str(self.height) + '\n'
         for y in range(self.height):
             for x in range(self.width):
-                saved_node = self.board_array[x, y].save() + " "
-                stream += str(saved_node)
+                # TODO change food savings
+                saved_node = "{:d},{:d},{} ".format(self.touched[x, y], self.foods[x, y] != 0, self.dropped_blob[x, y])
+                stream += saved_node
             stream = stream.rstrip(' ')
             stream += '\n'
 
@@ -57,24 +60,56 @@ class Board:
 
                 x = 0
                 for node in nodes:
-                    self.board_array[x, y].load(node)
+                    values = node.split(',')
+
+                    if len(values) != 3:
+                        print("Error with packaged values !")
+
+                    self.touched[x, y] = values[0] == '1'
+
+                    # TODO Adapt loadings
+                    if values[1] == '1':
+                        self.foods[x, y] = Board.INIT_FOOD
+
+                    self.dropped_blob[x, y] = float(values[2])
                     x += 1
 
                 y += 1
 
     def has_food(self, x, y):
-        return self.inside(x, y) and self.board_array[x, y].food
+        return self.inside(x, y) and self.foods[x, y] > 0
+
+    def set_food(self, x, y):
+        if not self.foods[x, y] > 0:
+            self.foods[x, y] = Board.INIT_FOOD
+
+    def remove_food(self, x, y):
+        if self.foods[x, y] > 0:
+            self.foods[x, y] = 0
 
     def update_blob(self, x, y, change_value):
         if self.inside(x, y):
-            self.board_array[x, y].update_blob(change_value)
+            self.touched[x, y] = True
+            self.dropped_blob[x, y] = max(0, min(self.dropped_blob[x, y] + change_value, Board.MAX_BLOB))
             return True
         else:
             return False
 
+    def eat_food(self, x, y, change_value):
+        if self.foods[x, y] > 0:
+            if self.foods[x, y] - change_value >= 0:
+                self.foods[x, y] -= change_value
+            else:
+                change_value = self.foods[x, y]
+                self.foods[x, y] = 0
+        else:
+            change_value = 0
+
+        return change_value, self.foods[x, y] <= 0
+
     def get_blob(self, x, y):
         if self.inside(x, y):
-            return self.board_array[x, y].blob
+            return self.dropped_blob[x, y]
         else:
             return None
 
@@ -83,43 +118,51 @@ class Board:
 
     def is_touched(self, x, y):
         if self.inside(x, y):
-            return self.board_array[x, y].touched
+            return self.touched[x, y]
         else:
             return False
+
+    def get_cover(self, half_board=0):
+        if half_board == 1:
+            val = np.sum(self.touched[:, 0:int(self.height/2)]) * 2
+        elif half_board == 2:
+            val = np.sum(self.touched[:, int(self.height/2):self.height]) * 2
+        else:
+            val = np.sum(self.touched)
+
+        return val / self.height / self.width * 100
+
+    def get_blob_total(self):
+        total = 0
+        for x in range(self.width):
+            for y in range(self.height):
+                total += self.dropped_blob[x, y]
+
+        return total / self.height / self.width / self.MAX_BLOB * 100
 
     def next_turn(self, food_lock=True):
         for x in range(self.width):
             for y in range(self.height):
-                if self.board_array[x, y].touched:
-                    if not (food_lock and self.board_array[x,y].food):
-                        self.board_array[x, y].update_blob(-Board.DECREASE_BLOB)
+                if self.touched[x, y]:
+                    if not (food_lock and self.foods[x, y] > 0 and self.dropped_blob[x, y] <= Board.MIN_FOOD_BLOB):
+                        self.update_blob(x, y, -Board.DECREASE_BLOB)
 
     def reset(self, x, y):
         if self.inside(x, y):
-            self.board_array[x, y] = Square()
+            self.touched[x, y] = False
+            self.dropped_blob[x, y] = 0
+            self.foods[x, y] = 0
 
+    def compare(self, board):
+        if board.height != self.height and board.width != self.width:
+            print("Size don't match !")
+            return None
 
-class Square:
+        board_comp = Board(self.width, self.height)
+        for x in range(self.width):
+            for y in range(self.height):
+                board_comp.foods[x, y] = board.foods[x, y] - self.foods[x, y]
+                board_comp.touched[x, y] = self.touched[x, y] == board.touched[x, y]
+                board_comp.dropped_blob[x, y] = board.dropped_blob[x, y] - self.dropped_blob[x, y]
 
-    def __init__(self):
-        self.food = False
-        self.touched = False
-        self.blob = 0
-
-    def update_blob(self, change_value):
-        self.touched = True
-        self.blob += change_value
-        self.blob = max(0, min(self.blob, Board.MAX_BLOB))
-
-    def save(self):
-        return format(self.touched, 'd') + "," + format(self.food, 'd') + "," + str(self.blob)
-
-    def load(self, node):
-        values = node.split(',')
-
-        if len(values) != 3:
-            print("Error with packaged values !")
-
-        self.touched = values[0] == '1'
-        self.food = values[1] == '1'
-        self.blob = float(values[2])
+        return board_comp

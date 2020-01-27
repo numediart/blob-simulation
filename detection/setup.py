@@ -19,9 +19,11 @@ import cv2
 import json
 import datetime
 import time
+import numpy as np
 from shutil import copyfile
 from os.path import exists
 from os import makedirs
+from math import sqrt
 
 
 def main():
@@ -46,6 +48,7 @@ def main():
 
     food_color = FoodColor(img, scale, window_name)
     board_setup = BoardLimits(img, scale, window_name)
+    food_limits = FoodLimits(img, scale, window_name)
 
     done = False
     state = 0
@@ -110,6 +113,13 @@ def main():
 
                 show_menu()
 
+            elif key == "5":
+                state = 3
+                food_limits.clear()
+                food_limits.help()
+                cv2.setMouseCallback(window_name, food_limits.on_mouse)
+
+
             elif key == "s":
                 ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H.%M.%S-')
                 if exists(args["config"]):
@@ -118,7 +128,8 @@ def main():
                     copyfile(args["config"], "bkp/" + ts + args["config"])
 
                 with open(args["config"], "w") as file:
-                    json.dump({**setup_vars, **board_setup.toJSON(), **food_color.toJSON()}, file)
+                    json.dump({**setup_vars, **board_setup.toJSON(), **food_color.toJSON(), **food_limits.toJSON()},
+                              file, indent=4, sort_keys=True)
 
                 done = True
 
@@ -138,6 +149,12 @@ def main():
                 state = 0
                 show_menu()
 
+        elif state == 3:
+            food_limits.draw()
+            if food_limits.done:
+                state = 0
+                show_menu()
+
 
 def show_menu():
     print("\nCommands: ")
@@ -145,6 +162,7 @@ def show_menu():
     print("\tEnter '2' to setup food color")
     print("\tEnter '3' to insert image aspect ratio")
     print("\tEnter '4' to insert discrete image height and width")
+    print("\tEnter '5' to setup food limits")
     print("\tEnter 's' to save & quit")
     print("\tEnter 'q' to quit without saving")
 
@@ -217,14 +235,82 @@ class BoardLimits:
             self.help()
 
 
+class FoodLimits:
+
+    def __init__(self, img, scale, window_name):
+        self.limits = []
+        self.max_limits = 4
+        self.orig = img
+        self.img = img.copy()
+        self.scale = scale
+        self.window_name = window_name
+        self.done = False
+        self.limits_drawn = False
+        self.min_dist = 5
+
+    def add_limit(self, x, y):
+        x_img = int(x / self.scale)
+        y_img = int(y / self.scale)
+        self.limits.append((x_img, y_img))
+        cv2.drawMarker(self.img, (x_img, y_img), (0, 0, 255), thickness=5)
+
+    def draw(self):
+        if len(self.limits) == self.max_limits and not self.limits_drawn:
+            for i, limit in enumerate(self.limits):
+                cv2.line(self.img, self.limits[i-1], limit, (0, 0, 255), thickness=3)
+            self.limits_drawn = True
+
+        cv2.imshow(self.window_name, cv2.resize(self.img, (0, 0), fx=self.scale, fy=self.scale))
+
+        if self.enough_data():
+            self.confirm()
+
+    def enough_data(self):
+        return len(self.limits) == self.max_limits
+
+    def compute(self):
+        # TODO Improve with warp perspective...
+        self.min_dist = self.img.shape[0]
+        for i, (x,y) in enumerate(self.limits):
+            dist = sqrt((x - self.limits[i-1][0])**2 + (y - self.limits[i-1][1])**2)
+            self.min_dist = dist if dist < self.min_dist else self.min_dist
+        return self.min_dist
+
+    def toJSON(self):
+        return {'Min Food Size': self.min_dist}
+
+    def help(self):
+        print("--- Food Setup: Click on the {} corners of the tiniest food".format(self.max_limits))
+
+    def clear(self):
+        self.limits = []
+        self.limits_drawn = False
+        self.img = self.orig.copy()
+        self.done = False
+
+    def on_mouse(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONUP and not self.enough_data() :
+            if len(self.limits) < self.max_limits:
+                self.add_limit(x, y)
+
+    def confirm(self):
+        print("--- Food Setup: Press enter if you're ok with data or any other key if you want to restart setup...")
+        key = cv2.waitKey(0)
+        if key == 13:  # Enter
+            print("--- Food Setup: " + str(self.compute()))
+            self.done = True
+        else:
+            self.clear()
+            self.help()
+
+
 class FoodColor:
 
-    def __init__(self, img, scale, window_name, max_qt=0):
+    def __init__(self, img, scale, window_name):
         self.colors = []
         self.orig = img
         self.img = img.copy()
         self.scale = scale
-        self.max_qt = max_qt
         self.window_name = window_name
         self.done = False
 
@@ -232,19 +318,22 @@ class FoodColor:
         x_img = int(x / self.scale)
         y_img = int(y / self.scale)
         self.colors.append(self.orig[y_img, x_img])
-        cv2.drawMarker(self.img, (x_img, y_img), (0, 0, 255), thickness=5)
+        self.show_selected()
+
+    def show_selected(self):
+        if len(self.colors) >= 2:
+            low, high = self.compute()
+            mask = cv2.inRange(self.img, np.array(low, dtype=np.uint8), np.array(high, dtype=np.uint8))
+            maskrgb = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
+            selected = np.zeros(self.img.shape, dtype=np.uint8)
+            selected[:, :, 2] = mask
+
+            self.img = cv2.add(cv2.subtract(self.img, maskrgb), selected)
 
     def draw(self):
         cv2.imshow(self.window_name, cv2.resize(self.img, (0, 0), fx=self.scale, fy=self.scale))
-        if self.enough_data():
-            self.confirm()
-
-    def enough_data(self):
-        if self.max_qt == 0:
-            key = cv2.waitKey(10)
-            return key == 13  # Enter
-        else:
-            return len(self.colors) == self.max_qt
+        self.confirm()
 
     def compute(self):
         low_color = [255, 255, 255]
@@ -270,10 +359,7 @@ class FoodColor:
         return {'Low Food Color': l, 'High Food Color': h}
 
     def help(self):
-        if self.max_qt == 0:
-            print("--- Color Setup: Click several times on foods to setup food color and then press enter.")
-        else:
-            print("--- Color Setup: Click {} times on food to setup food color".format(self.max_qt))
+        print("--- Color Setup: Click several times on foods to setup food color and then press enter.")
 
     def clear(self):
         self.colors = []
@@ -281,18 +367,19 @@ class FoodColor:
         self.done = False
 
     def on_mouse(self, event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONUP and not self.enough_data() :
+        if event == cv2.EVENT_LBUTTONUP:
             self.add(x, y)
 
     def confirm(self):
-        print("--- Color Setup: Press enter if you're ok with data or any other key if you want to restart setup...")
-        key = cv2.waitKey(0)
+        key = cv2.waitKey(10)
         if key == 13:  # Enter
             print("--- Color Setup: " + str(self.compute()))
             self.done = True
-        else:
-            self.clear()
-            self.help()
+        elif key == 0 and len(self.colors) > 0:  # Delete
+            del self.colors[len(self.colors)-1]
+            self.img = self.orig.copy()
+            self.show_selected()
+            print("Last color removed. {} remaining(s).".format(len(self.colors)))
 
 
 if __name__ == "__main__":
