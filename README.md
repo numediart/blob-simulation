@@ -74,14 +74,14 @@ Le passage à cette release invalide les fichiers de sauvegarde précédents, le
 
 La nouvelle interface de la simulation produira des images comme celle-ci : 
 
-![Interface de simulation](example/test-run.jpg?raw=true "Interface de simulation") 
+![Interface de simulation](https://github.com/numediart/blob-simulation/blob/2.0/example/test-run.jpg?raw=true "Interface de simulation") 
 
 Pour exécuter le script de comparaison sur un exemple : 
 `python compare.py --first example/test.board --second example/test-run.board`
 
 L'image affichée sera la suivante : 
 
-![Comparaison entre deux simulations](example/test-compare.jpg?raw=true "Comparaison entre deux simulations") 
+![Comparaison entre deux simulations](https://github.com/numediart/blob-simulation/blob/2.0/example/test-compare.jpg?raw=true "Comparaison entre deux simulations") 
 
 
 ## Release 1.1 - *13/05/2019*
@@ -108,7 +108,7 @@ Pour avoir l'exemple, utiliser la commande :
 `python main.py --save_dir example/ --init_from test`
 Vous devriez alors voir apparaître la simulation suivante  : 
 
-![Simulation screenshot](example/test.jpg?raw=true "Test Simulation") 
+![Simulation screenshot](https://github.com/numediart/blob-simulation/blob/1.0/example/test.jpg?raw=true.jpg?raw=true "Test Simulation") 
 
 ### Commandes
 #### Actions sur le blob
