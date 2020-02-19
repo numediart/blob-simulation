@@ -1,8 +1,8 @@
 # Blob Simulation & Detection
 Detection of a blob in an image as well as detection of food tablets. Simulation of a blob in PyGame through a shared knowledge multi-agent system.
 
-A french translation of this document is available [here](README.fr.md)
-Ce document est aussi disponible en français [ici](README.fr.md)
+A french translation of this document is available [here](README.fr.md).  
+Ce document est aussi disponible en français [ici](README.fr.md).
 
 1. [How to use](HOWTO.md)
 2. [Requirements](#requirements)
