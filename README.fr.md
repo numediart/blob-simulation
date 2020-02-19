@@ -1,17 +1,17 @@
 # Blob Simulation & Detection
 Détection d'un blob dans une image ainsi que détection des comprimés de nourriture. Simulation d'un blob dans PyGame à travers un système multi-agents à connaissance partagée.
 
-1. [How to use](HOWTO.md)
-2. [Requirements](#requirements)
-3. [Pour aller plus loin](TOGOFURTHER.md)
+1. [Utilisation](HOWTO.fr.md)
+2. [Logiciels et bibliothèques requis](#logiciels-et-bibliothèques-requis)
+3. [Pour aller plus loin](TOGOFURTHER.fr.md)
 4. [Releases](#releases)
-5. [License](#license)
+5. [Licence](#licence)
 6. [Mentions légales](#mentions-légales)
 
-## How to use
+## Utilisation
 Vous trouverez la description détaille des différents scripts et des fichiers de configuration [ici](HOWTO.md).
 
-## Requirements
+## Logiciels et bibliothèques requis
 + [Python 3.6.8](https://www.python.org/downloads/release/python-368/) - [Documentation](https://docs.python.org/3.6/)
 + [Numpy 1.16.4](https://pypi.org/project/numpy/1.16.4/) - BSD License
 + [Pathfinding 0.0.4](https://pypi.org/project/pathfinding/0.0.4/) - MIT License
@@ -100,10 +100,10 @@ Première version d'un simulateur ainsi que de la détection dans une image.
 
 Le workflow complet existe en partant d'un premier setup, suivi de détections et de simulations. Il demande encore des opérations manuelles cependant.
 
-Dans l'ordre, exécuter "detection/setup-detection.py", 
-Puis exécuter "detection/detector.py", le fichier board pour la simulation est généré dans la console, à replacer dans un fichier si celui-ci doit démarrer une simulation.
+Dans l'ordre, exécuter `detection/setup-detection.py`, 
+Puis exécuter `detection/detector.py`, le fichier board pour la simulation est généré dans la console, à replacer dans un fichier si celui-ci doit démarrer une simulation.
 
-Le code "main.py" peut être lancé séparement ou à partir d'un fichier d'exemple.
+Le code `main.py` peut être lancé séparement ou à partir d'un fichier d'exemple.
 Pour avoir l'exemple, utiliser la commande : 
 `python main.py --save_dir example/ --init_from test`
 Vous devriez alors voir apparaître la simulation suivante  : 
@@ -128,7 +128,7 @@ Vous devriez alors voir apparaître la simulation suivante  :
 + **SPACE** montre ou cacher les fourmis
 + **S** sauvegarde la simulation
 
-## License
+## Licence
 Copyright (C) 2019 - UMons
 
 This library is free software; you can redistribute it and/or
@@ -145,7 +145,19 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+*Cette bibliothèque est un logiciel libre ; vous pouvez la redistribuer et/ou
+le modifier selon les termes du GNU Lesser General Public
+Licence telle que publiée par la Free Software Foundation ; soit
+la version 2.1 de la licence, ou (à votre choix) toute version ultérieure.*
+
+*Cette bibliothèque est distribuée dans l'espoir qu'elle vous sera utile,
+mais SANS AUCUNE GARANTIE ; sans même la garantie implicite de
+la qualité marchande ou l'adéquation à un usage particulier.  Voir le site web de GNU
+Lesser General Public License pour plus de détails.*
+
 ## Mentions légales
-Cette publication a été réalisée dans le cadre du projet Interreg de coopération transfrontalière C2L3PLAY, cofinancé par L’Union Européenne. Avec le soutien du Fonds européen de développement régional / Met steun van het Europees Fonds voor Regionale Ontwikkeling
+Cette publication a été réalisée dans le cadre du projet Interreg de coopération transfrontalière C2L3PLAY, cofinancé par L’Union Européenne.  
+Avec le soutien du Fonds européen de développement régional /  
+Met steun van het Europees Fonds voor Regionale Ontwikkeling
 
 <img src="https://crossborderlivinglabs.eu/wp-content/uploads/2018/02/LogoProjets_GoToS3_C2L3PLAY.png" width="200px"/>
