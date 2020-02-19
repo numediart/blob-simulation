@@ -113,23 +113,23 @@ Vous devriez alors voir apparaître la simulation suivante  :
 
 ![Simulation screenshot](https://github.com/numediart/blob-simulation/blob/1.0/example/test.jpg?raw=true.jpg?raw=true "Test Simulation") 
 
-### Commandes
-#### Actions sur le blob
-+ **P** démarre ou arrête la simulation
-+ **RETURN** fait avancer d'un pas la simulation
-+ **K** tue une des fourmis
-+ **A** ajoute une fourmi
-#### Actions du joueur
-+ **Clic droit** ajoute un comprimé de nourriture à l'endroit cliqué / (Mode debug) ajoute du blob à l'endroit cliqué
-+ **N** nettoie le plateau
-+ **R** ajoute aléatoirement des comprimés de nourriture
-+ **H** affiche la taille actuelle du blob en pourcentage
-#### Actions admin
-+ **D** passer en mode debug ou mode normal
-+ **UP** augmente l'évaporation du blob
-+ **DOWN** diminue l'évaporation du blob
-+ **SPACE** montre ou cacher les fourmis
-+ **S** sauvegarde la simulation
+### Controls
+#### Actions on the blob
++ **P** start an stop simulation
++ **RETURN** next simulation step
++ **K** kill one of the ants
++ **A** add one ant
+#### Player actions
++ **Right click** add a food pellet at the clicked location / (Debug mode) add blob at the clicked location
++ **N** clean the board
++ **R** randomly add food pellet
++ **H** display the current size of the blob (percent)
+#### Admin actions
++ **D** switch between normal and debug modes
++ **UP** increase blob evaporation
++ **DOWN** decrease blob evaporation
++ **SPACE** show where the ants
++ **S** save the simulation
 
 ## License
 Copyright (C) 2019 - UMons
@@ -149,7 +149,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 ## Legal notices
-This publication has been produced in the framework of the Interreg cross-border cooperation project C2L3PLAY, co-financed by the European Union. 
-With the support of the European Regional Development Fund / Avec le soutien du Fonds européen de développement régional / Met steun van het Europees Fonds voor Regionale Ontwikkeling
+This publication has been produced in the framework of the Interreg cross-border cooperation project C2L3PLAY, co-financed by the European Union.  
+With the support of the European Regional Development Fund /  
+Avec le soutien du Fonds européen de développement régional /  
+Met steun van het Europees Fonds voor Regionale Ontwikkeling
 
 <img src="https://crossborderlivinglabs.eu/wp-content/uploads/2018/02/LogoProjets_GoToS3_C2L3PLAY.png" width="200px"/>
