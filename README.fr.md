@@ -103,7 +103,7 @@ Le workflow complet existe en partant d'un premier setup, suivi de détections e
 Dans l'ordre, exécuter `detection/setup-detection.py`, 
 Puis exécuter `detection/detector.py`, le fichier board pour la simulation est généré dans la console, à replacer dans un fichier si celui-ci doit démarrer une simulation.
 
-Le code `main.py` peut être lancé séparement ou à partir d'un fichier d'exemple.
+Le code `main.py` peut être lancé séparement ou à partir d'un fichier d'exemple.  
 Pour avoir l'exemple, utiliser la commande : 
 `python main.py --save_dir example/ --init_from test`
 Vous devriez alors voir apparaître la simulation suivante  : 
