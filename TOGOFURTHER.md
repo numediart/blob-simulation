@@ -1,6 +1,6 @@
-# Pour aller plus loin
-## Physarum polycephalum ou Blob
-Beaucoup d'articles scientifiques (et des livres de vulgarisation) existent sur le blob mais ceux-ci se concentrent sur l'analyse de son comportement et sur sa faculté à résoudre certains problèmes. La plupart de ses problèmes sont liés à des représentations sous forme de graphe (TSP Problem, Dijkstra, Voronoï diagram, Delaunay triangluation, ...) Il n'y a donc pas d'articles cherchant à modéliser son comportement. Au niveau détection, il existe le code MatLab fourni par le CNRS.
+# To go further
+## Physarum polycephalum or Blob
+Many scientific articles (and popular books) exist on the blob, but these focus on the analysis of its behaviour and its ability to solve certain problems. Most of its problems are related to graphical representations (TSP Problem, Dijkstra, Voronoï diagram, Delaunay triangluation, ...). There are therefore no articles trying to model its behaviour. At the detection level, there is the MatLab code provided by the CNRS.
 
 **Dussutour**, Audrey (2017).*Tout ce que vous avez toujours voulu savoir sur le blob sans avoir jamais oser le demander.* Des Équateurs, Hors collection, 179 pages.
 
@@ -11,19 +11,19 @@ Beaucoup d'articles scientifiques (et des livres de vulgarisation) existent sur 
 **Jones, Jeff, &amp; Andrew Adamatzky.** [Computation of the travelling salesman problem by a shrinking blob](http://www.phychip.eu/wp-content/uploads/2013/03/Computation-of-the-travelling-salesman-problem-by-a-shrinking-blob.pdf) *Natural Computing,* (13), 1, p. 1-16, (2014).</p>
 **Shirakawa**, Tomohiro &amp; **Adamatzky**, Andrew &amp; **Gunji**, Yukio-Pegio &amp; **Miyake**, Yoshihiro. (2009). On Simultaneous Construction of Voronoi Diagram and Delaunay Triangulation by. I. J. Bifurcation and Chaos. 19. 3109-3117. 10.1142/S0218127409024682.
 
-## Système multi-agents
+## Multi-agent system
 
-En soi, le blob n'est pas un système multi-agents puisqu'il n'est constitué que d'une seule cellule. Néanmoins, la plupart des problèmes qu'il arrive à résoudre sont aujourd'hui plus facilement résolu par des systèmes multi-agents.
+In itself, the blob is not a multi-agent system since it consists of only one cell. Nevertheless, most of the problems it can solve are nowadays more easily solved by multi-agent systems.
 
-Un type connu de système multi-agents est le comportement d'une colonie de fourmis. On retrouve donc le lien entre blob et fourmis à travers ses différents problèmes. Audrey Dussutour, avant de se concentrer sur le blob, se spécifiait dans le comportement des fourmis également.
+A known type of multi-agent system is the behaviour of a colony of ants. The link between blob and ants can be found in its various problems. Audrey Dussutour, before concentrating on the blob, was specifying herself in the behavior of ants as well.
 
-NetLogo est un langage de programmation pour système multi-agents, basé sur du Logo (lui-même basé sur du LISP). L'environnement n'est pas ultra-modulable mais il fournit une série de modèles implémentés et prêts à l'emploi. Certains de ceux-ci (listés ci-dessous) correspondent aux problèmes résolus par le blob ou par des algorithmes ACO (Ants Colony Optimization).
+NetLogo is a programming language for multi-agent systems, based on Logo (itself based on LISP). The environment is not ultra-modular, but it provides a series of implemented and ready-to-use models. Some of these (listed below) correspond to problems solved by blob or by ACO (Ants Colony Optimization) algorithms.
 
-Il existe également un pseudo-code permettant de simuler le comportement d'un blob à travers une approche multi-agents.
+There is also a pseudo-code to simulate the behavior of a blob through a multi-agent approach.
 
 Wilensky, U. (1999). **NetLogo**. [http://ccl.northwestern.edu/netlogo/](http://ccl.northwestern.edu/netlogo/) Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.</p>
 
-### Modèles
+### Models
 + Stonedahl, F. and Wilensky, U. (2008).  [**NetLogo Virus on a Network model**](http://ccl.northwestern.edu/netlogo/models/VirusonaNetwork). Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
 
 + Wilensky, U. (2005).  [**NetLogo Preferential Attachment model**](http://ccl.northwestern.edu/netlogo/models/PreferentialAttachment). Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
@@ -36,9 +36,9 @@ Wilensky, U. (1999). **NetLogo**. [http://ccl.northwestern.edu/netlogo/](http://
 [Pseudo-code multi-agents pour simuler un blob](http://www.simulace.info/index.php/Multi-agent_systems) dans NetLogo.
 
 ## IA &amp; Optimization Algorithm Problems
-Aucune base de données n'étant disponible pour simuler le blob dans le cas précis du projet, il est nécessaire d'en revenir à des comportements prédits de manière algorithmiques.
+Since no database is available to simulate the blob in the specific case of the project, it is necessary to return to algorithmically predicted behaviors.
 
-Les techniques classiques d'IA utilisées pour résoudre des problèmes par exploration d'arbres de solution sont donc à privilégier. Le blob peut être envisagé comme un joueur devant découvrir au plus vite des ressources dans un environnement inconnu et à optimiser les connexions entre ces ressources. Sur ce second point, il travaille donc comme un algorithme ACO. Pour la partie découverte, il existe également déjà des simulateurs de parcours de fourmis mais ceux trouvés sont difficilement modifiables.
+Classical AI techniques used to solve problems by exploring solution trees are therefore to be preferred. The blob can be seen as a player who must discover resources in an unknown environment as quickly as possible and optimize the connections between these resources. On this second point, it works like an ACO algorithm. For the discovery part, there are also already simulators of ant routes but those found are difficult to modify.
 
 **Russel**, Stuart Jonathan, **Norvig**, Peter (2009). *Artificial Intelligence : A modern approach*. Pearson, 3rd Edition,&nbsp; 1152 pages.
 
@@ -67,7 +67,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-## Mentions légales
-Cette publication a été réalisée dans le cadre du projet Interreg de coopération transfrontalière C2L3PLAY, cofinancé par L’Union Européenne. Avec le soutien du Fonds européen de développement régional / Met steun van het Europees Fonds voor Regionale Ontwikkeling
+## Legal Notice
+This publication has been produced in the framework of the Interreg cross-border cooperation project C2L3PLAY, co-financed by the European Union. With the support of the European Regional Development Fund 
 
 <img src="https://crossborderlivinglabs.eu/wp-content/uploads/2018/02/LogoProjets_GoToS3_C2L3PLAY.png" width="200px"/>
