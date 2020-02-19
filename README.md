@@ -28,8 +28,8 @@ You will find some scientific articles and tips related to the development of th
 ## Releases
 ### Release 2.2 - *24/06/2019*
 #### Modifications : 
-+ Ajout d'un fichier requirements.txt avec les versions des modules utilisées
-+ Transformation de l'argument "input" en argument positionnel
++ Add a *requirements.txt* file with the versions of the modules used
++ Transform "input" argument into positional
 
 #### Scripts : 
 + Setup : `python setup.py data/example.jpg`
@@ -40,16 +40,17 @@ You will find some scientific articles and tips related to the development of th
 ### Release 2.1 - *7/06/2019*
 
 #### Modifications : 
-+ Déplacement des scripts dans le dossier root
-+ Changement du nom des fichiers enregistrés par la détection
-+ Automatisation des différents scripts, ajout d'un fonctionnement en mode "caché".
-+ Automatisation de la simulation avec ajouts de paramètres et sauvegarde finale
-+ Ajout d'un paramètre pour initialiser de la nourriture dans la simulation
-+ Ajout d'un paramètre d'affichage dans la simulation
-+ Uniformisation des paramètres dans les différents scripts
-+ Possibilité de raffiner un modèle détecté avec un fichier d'informations supplémentaires
-+ Variables de couleur déplacées dans un fichier json séparé
-+ Ajout de fichiers d'exemples pour les différents scripts
++ Move scripts to the root folder
++ Change the name of the files recorded by the detection
++ Automation of the different scripts
++ Add a "hidden" mode of operation
++ Automation of the simulation with new parameters and final save
+  + Add parameter to initialize food
+  + Add parameter to control how simulation is displayed
++ Standardize parameters between different scripts
++ Ability to refine a detected template with an additional information file
++ Color values in a separate json file
++ Add examples for the scripts
 
 #### Scripts : 
 + Setup : `python setup.py -i data/example.jpg`
@@ -57,61 +58,62 @@ You will find some scientific articles and tips related to the development of th
 + Simulation : `python play.py -i data/output-examples/example-detect.board -s 3`
 + Compare : `python compare.py --first data/output-examples/simulation/10_loops/10_loops.board --second data/output-examples/simulation/100_loops/100_loops.board -s 3`
 
-Les différentes sorties produites sont les suivantes : 
-![Sortie du script de détection](data/output-examples/example-detect-details.jpg?raw=true "Sortie du script de détection") 
-![Sortie de la simulation après 100 itérations](data/output-examples/simulation/100_loops/100_loops.jpg?raw=true "Sortie de la simulation après 100 itérations")
-![Sortie du script de comparaison](data/compare_init_with_100.jpg?raw=true "Sortie du script de comparaison") 
+Here are the outputs : 
+![Detection script output](data/output-examples/example-detect-details.jpg?raw=true "Detection script output") 
+![Simulation after 100 iterations](data/output-examples/simulation/100_loops/100_loops.jpg?raw=true "Simulation after 100 iterations")
+![Comparison script output](data/compare_init_with_100.jpg?raw=true "Comparison script output") 
 
 
 ### Release 2.0 - *27/05/2019*
 
-Le passage à cette release invalide les fichiers de sauvegarde précédents, le format ayant été modifié.
+Switching to this release invalidates the previous backup files because the format has been changed.
 
 #### Modifications :
-+ Logique du blob améliorée (les fourmis ont un horizon de vue, les exploratrices ont deux modes de fonctionnement et le blob calcule mieux la quantité de fourmis qu’il peut utiliser)
-+ Utilisation de la nourriture améliorée (le lien entre détection et virtuel est plus réaliste, la nourriture peut s’épuiser et il est plus facile d’ajouter ou retirer de la nourriture en grande quantité)
-+ Transformation d'une série de fichiers vers un format json (notamment les fichiers player et blob)
-+ Déplacement d'une série de variables dans des fichiers de configuration et création des fichiers de configuration "par défaut"
-+ Simplification du changement de couleurs de l'interface
-+ Ajout d'un script de comparaison entre deux sauvegardes
++ Improved blob logic (ants have a horizon view, explorers have two modes of operation and the blob manages better how many ants it can use)
++ Improved food utilization (the link between detection and virtual is more realistic, the food can run out and it is easier to add or remove food in large quantities)
++ Transform some files to a json format (especially player and blob files)
++ Move a series of variables into configuration files and create "default" configuration files
++ Simplification of the interface color changeover
++ Add a script to compare two backups
 
-La nouvelle interface de la simulation produira des images comme celle-ci : 
+The new interface will produce images like this : 
 
-![Interface de simulation](https://github.com/numediart/blob-simulation/blob/2.0/example/test-run.jpg?raw=true "Interface de simulation") 
+![simulation interface](https://github.com/numediart/blob-simulation/blob/2.0/example/test-run.jpg?raw=true "simulation interface") 
 
-Pour exécuter le script de comparaison sur un exemple : 
+To call comparison script on one example : 
 `python compare.py --first example/test.board --second example/test-run.board`
 
-L'image affichée sera la suivante : 
+It will display an image like this one : 
 
-![Comparaison entre deux simulations](https://github.com/numediart/blob-simulation/blob/2.0/example/test-compare.jpg?raw=true "Comparaison entre deux simulations") 
+![Comparison between two simulations](https://github.com/numediart/blob-simulation/blob/2.0/example/test-compare.jpg?raw=true "Comparison between two simulations") 
 
 
 ### Release 1.1 - *13/05/2019*
-Correction de bugs, réorganisation du code en dossiers et fichiers.
-Les trois exécutables se trouvent maintenant ici : 
-+ Fichier de setup : `detection/setup.py`
-+ Fichier de détection du blob dans une image : `detection/detect.py`
-+ Fichier de simulation : `simulation/play.py`
+Bug fixes, code reorganization into folders and files.
+The three executable scripts are now located here : 
++ Setup : `detection/setup.py`
++ Blob detection in a single image : `detection/detect.py`
++ Simulation : `simulation/play.py`
 
-Pour essayer l'exemple, utiliser la commande : 
+To run the example : 
 `python simulation/play.py --save_dir example/ --init_from test`
 
 ### Release 1.0 - *02/05/2019*
 
-Première version d'un simulateur ainsi que de la détection dans une image.
+First version of a simulator as well as detection in an image.
 
-Le workflow complet existe en partant d'un premier setup, suivi de détections et de simulations. Il demande encore des opérations manuelles cependant.
+The complete workflow is usable, starting from a first setup, followed by detections and simulations. It still requires manual operations though.
 
-Dans l'ordre, exécuter "detection/setup-detection.py", 
-Puis exécuter "detection/detector.py", le fichier board pour la simulation est généré dans la console, à replacer dans un fichier si celui-ci doit démarrer une simulation.
+First, call `detection/setup-detection.py`, 
+Then `detection/detector.py`, the board file for the simulation is generated in the console, to be replaced in a file if the console has to start a simulation
 
-Le code "main.py" peut être lancé séparement ou à partir d'un fichier d'exemple.
-Pour avoir l'exemple, utiliser la commande : 
+The file `main.py` can be launched separately or from an example file.
+To get the example, please run : 
 `python main.py --save_dir example/ --init_from test`
-Vous devriez alors voir apparaître la simulation suivante  : 
 
-![Simulation screenshot](https://github.com/numediart/blob-simulation/blob/1.0/example/test.jpg?raw=true.jpg?raw=true "Test Simulation") 
+You then should get this simulation :
+
+![Simulation screenshot](https://github.com/numediart/blob-simulation/blob/1.0/example/test.jpg?raw=true.jpg?raw=true "Simulation screenshot") 
 
 ### Controls
 #### Actions on the blob
@@ -128,7 +130,7 @@ Vous devriez alors voir apparaître la simulation suivante  :
 + **D** switch between normal and debug modes
 + **UP** increase blob evaporation
 + **DOWN** decrease blob evaporation
-+ **SPACE** show where the ants
++ **SPACE** show where are the ants
 + **S** save the simulation
 
 ## License
