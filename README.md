@@ -156,4 +156,4 @@ With the support of the European Regional Development Fund /
 Avec le soutien du Fonds européen de développement régional /  
 Met steun van het Europees Fonds voor Regionale Ontwikkeling
 
-<img src="https://crossborderlivinglabs.eu/wp-content/uploads/2018/02/LogoProjets_GoToS3_C2L3PLAY.png" width="200px"/>
+<img src="https://crossborderlivinglabs.eu/wp-content/uploads/2020/09/C2L3Play-GoToS3-Interreg-logo-banner.jpg" width="200px"/>
