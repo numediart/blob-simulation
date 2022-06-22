@@ -1,5 +1,5 @@
 pygame==1.9.6
 imutils==0.5.2
-numpy==1.16.4
+numpy==1.22.0
 pathfinding==0.0.4
 opencv_python==4.1.0.25
